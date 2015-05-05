@@ -1,27 +1,13 @@
 %% Signal check
 
-tp=12; % Select one of the test persons
-i=12; % Select one of the twelve files recorded for each person
+tp=1; % Select one of the test persons
+i=1; % Select one of the twelve files recorded for each person
 
-tpdirs={'VPpaa_15_03_04'
-    'VPpab_15_03_06'
-    'VPpac_15_03_09'
-    'VPpah_15_03_12'
-    'VPpai_15_03_13'
-    'VPpag_15_03_12'
-    'VPpaf_15_03_11'
-    'VPpae_15_03_11'
-    'VPpad_15_03_10'
-    'VPpal_15_03_17'
-    'VPpak_15_03_16'
-    'VPpaj_15_03_16'
-    };
+% Get subdir_list and tags for the experimental conditions
+convertBase;
 
-tags={'hf_cr' 'hf_sq' 'lf_cr' 'lf_sq' 'hf_do' 'hf_st' 
-    'lf_do' 'lf_st' 'hf_es' 'hf_tr' 'lf_es' 'lf_tr'};
-
-tpcode=regexp(tpdirs{tp},'_','split');tpcode=tpcode{1};
-eeg_file=fullfile(tpdirs{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);
+tpcode=regexp(subdir_list{tp},'_','split');tpcode=tpcode{1};
+eeg_file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);
 [cnt, mrk]= file_readBV(eeg_file);
 bbci= struct;
 bbci.source.acquire_fcn= @bbci_acquire_offline;
