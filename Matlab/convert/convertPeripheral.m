@@ -42,15 +42,25 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         
         clabScalp= hdr.clab(util_scalpChannels(hdr.clab));
         clabNonScalp= hdr.clab(util_chanind(hdr.clab, 'not',clabScalp));
+
         
         % load raw data, downsampling is done while loading
         Fs = 250; % new sampling rate
-        [cnt, mrk] = file_readBV(file, 'Fs',Fs, 'Filt',filt ,'Clab', clabScalp);
+        [cnt, mrk] = file_readBV(file, 'Fs',Fs, 'Filt',filt, 'Clab', clabNonScalp);
         
         % Load eye tracking data
         [ET_mrk] = readETMarkers(file);
         
         % Subtract corresponding bipolar electrodes of electrodes for facial EMG and electrodermal activity
+        i_fEMG1 = util_chanind(cnt.clab, 'fEMG1');
+        i_fEMG2 = util_chanind(cnt.clab, 'fEMG2');
+        i_fEMG3 = util_chanind(cnt.clab, 'fEMG3');
+        i_fEMG4 = util_chanind(cnt.clab, 'fEMG4');
+        i_fEDA1 = util_chanind(cnt.clab, 'EDA1');
+        i_fEDA2 = util_chanind(cnt.clab, 'EDA2');
+        cnt = proc_appendChannels(cnt, cnt.x(:,i_fEMG1) - cnt.x(:,i_fEMG2), {'EMGa'});
+        cnt = proc_appendChannels(cnt, cnt.x(:,i_fEMG3) - cnt.x(:,i_fEMG4), {'EMGb'});
+        cnt = proc_appendChannels(cnt, cnt.x(:,i_fEDA1) - cnt.x(:,i_fEDA2), {'EDA'});
         cnt = proc_selectChannels(cnt,'not',{'fEMG1' 'fEMG2' 'fEMG3' 'fEMG4' 'EDA1' 'EDA2'});
         
         
@@ -85,12 +95,10 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         
         %% save in matlab format        
         matfilename = fullfile(BTB.MatDir,file);
-        eegfilename = regexprep(matfilename, 'MindSeeCollaborativeStudy2015', 'EEG');
+        eegfilename = regexprep(matfilename, 'MindSeeCollaborativeStudy2015', 'Peripheral');
         fprintf('Saving %s\n', eegfilename)
         warning('off', 'MATLAB:save:versionWithAppend')
         file_saveMatlab(eegfilename, cnt, mrk, mnt);
-        
-                                 
         %% Clear all unnecessary variables
         clearvars -except BTB subdir_list tp tpcode tags i
         
