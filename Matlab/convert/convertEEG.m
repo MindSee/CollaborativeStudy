@@ -89,40 +89,13 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             'EMGa,EMGb,_,_,EDA']);
         mnt = mnt_setGrid(mnt, grd);
         
-        %% Behavioural data        
-        
-        % load behavioral responses                
-        if isunix % Linux / Mac
-            answerfile=strtrim(ls(fullfile(BTB.Tp.Dir, '*_response_session1.mat'))); load(answerfile);
-            answerfile=strtrim(ls(fullfile(BTB.Tp.Dir, '*_response_session2.mat'))); load(answerfile);
-            answerfile=strtrim(ls(fullfile(BTB.Tp.Dir, '*_response_session3.mat'))); load(answerfile);
-        else % Windows
-            answerfile=fullfile(BTB.Tp.Dir, ls(fullfile(BTB.Tp.Dir, '*_response_session1.mat'))); load(answerfile);
-            answerfile=fullfile(BTB.Tp.Dir, ls(fullfile(BTB.Tp.Dir, '*_response_session2.mat'))); load(answerfile);
-            answerfile=fullfile(BTB.Tp.Dir, ls(fullfile(BTB.Tp.Dir, '*_response_session3.mat'))); load(answerfile);
-        end
-        
-        cmd=['Answers = response_' tags{i}(4:5) '_' tags{i}(1:2) ';']; eval(cmd);
-        
-        % Extract the number of targets, i.e. the correct answer
-        kk=1;
-        for ii=1:length(ET_mrk.desc)
-            if strncmp(ET_mrk.desc{ii},'Start',5)
-                tmp=regexp(ET_mrk.desc{ii},'_','split');
-                NumberOfTargets(kk)=str2num(tmp{end});
-                kk=kk+1;
-            end
-        end
-        
-        behaviour=struct('Answers',Answers ,'NumberOfTargets',NumberOfTargets);
-        
         %% save in matlab format        
         matfilename = fullfile(BTB.MatDir,file);
-        fprintf('Saving %s\n', matfilename)
+        eegfilename = regexprep(matfilename, 'MindSeeCollaborativeStudy2015', 'EEG');
+        fprintf('Saving %s\n', eegfilename)
         warning('off', 'MATLAB:save:versionWithAppend')
-        file_saveMatlab(matfilename, cnt, mrk, mnt);
-        behaviourfilename = regexprep(matfilename, 'MindSeeCollaborativeStudy2015', 'Behaviour');
-        save(behaviourfilename,'behaviour');
+        file_saveMatlab(eegfilename, cnt, mrk, mnt);
+        
         %% Clear all unnecessary variables
         clearvars -except BTB subdir_list tp tpcode tags i
         
