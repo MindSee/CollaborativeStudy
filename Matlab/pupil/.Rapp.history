@@ -1,0 +1,264 @@
+h
+ls()
+find.package(pastecs)
+.find.package(pastecs)
+find.package(pastecs)
+ls()
+minValTAbs
+ls()
+rm(list(ls()))
+rm(list=(ls()))
+ls()
+#function to remove outliers#
+outliers <- function (d) {#
+    s <- quantile(d, na.rm =TRUE, names=FALSE)#
+    minVal <- s[2] - 1.5*IQR(d,na.rm =TRUE)#
+    maxVal <- s[4] + 1.5*IQR(d,na.rm =TRUE)#
+    d[d > maxVal] <- NA#
+    d[d < minVal] <- NA#
+    return (d)#
+}#
+#
+#function to average the data#
+smoothAVG <- function(d, time_window, m) {#
+    m <- m*1000 #The actual timestamps are in microseconds!#
+    res <- c()#
+    a <- c()#
+    b <- c()#
+    timeIni <- time_window[1]#
+    timeEnd <- timeIni + m#
+    while (timeIni <= time_window[length(time_window)]) {#
+        a <- c(a, mean(d[time_window >= timeIni & time_window <= timeEnd], na.rm=TRUE))#
+        b <- c(b,mean(time_window[time_window >= timeIni & time_window <= timeEnd], na.rm=TRUE))#
+        timeIni <- timeEnd#
+        timeEnd <- timeIni + m#
+    }#
+    c <- rbind(a,b)#
+    return (c)#
+}#
+#we read the data#
+pup_dat <- read.table("Sj_41_1stBlock_GazePos.txt", header = TRUE, fill=TRUE, colClasses = c("LDiaXmm" = "character"))#
+#
+attach(pup_dat)#
+#
+# The variable marker has the indexes of the timestamps of the SendImageMessages of E-Prime#
+marker = which(Type == "MSG")#
+#
+#change the variable numTrial, to select the trial you want to plot. We are plotting trial 4#
+numTrial <- 1#
+i <- (numTrial-1)*6 + 1#
+#
+#change the marker numbers to select the chunck of data to plot.#
+timeIni = Time[marker[i+3]] #i.e., PbOff&TnoTOn#
+timeEnd = Time[marker[i+5]] # i.e., TrialEnd#
+#
+d<-LMapDiamm[Time > timeIni & Time < timeEnd]#
+time_window <- Time[Time > timeIni & Time < timeEnd]#
+#
+##To plot non-smoothed data, comment all this block#
+res <- smoothAVG(d, time_window, 30) #smooth the data every 30milliseconds#
+d <- res[1,]#
+time_window <- res[2,]#
+##END BLOCK#
+#To plot data without outliers removal, comment this line#
+d <- outliers(d)#
+##END LINE#
+#we plot the pupil size, against the latency in microseconds#
+t_scale <- time_window - time_window[1]#
+plot (t_scale,d)#
+#plot (t_scale,d, type = 'l')
+f <- function() {#
+# Set working directory#
+setwd("/Users/Plebaglia/Dropbox/MindSee_1stExp/Pupil_data/Final_Script_June3rd_2014/FINAL_script_basic_features_June25th_2014/")#
+#We define the environmental variables#
+CENTER_X <- 840#
+CENTER_Y <- 525#
+MARGIN_X <- 120#
+MARGIN_Y <- 120#
+WINDOW <- 100000 #microseconds to check in the rejectable window#
+THRESHOLD <- 80000 # microseconds out of range required to reject the trial#
+MILLISECSTOAVG <- 30 #milliseconds we want to average#
+# Load a file with different number of column and number&character#
+pup_dat <- read.table("Cleaned_Sj_51_1stBlock.txt", header = TRUE, fill=TRUE, colClasses = c("LDiaXmm" = "character"))#
+attach(pup_dat)#
+# The variable marker has the indexes of the timestamps of the SendImageMessages of E-Prime#
+marker = which(Type == "MSG")#
+# Initialise the variables#
+meanBasePriorContext <- c()#
+maxDilat_Context <- c()#
+meanBasePriorTarget <- c()#
+maxDilat_Target <- c()#
+maxDilat_Latency_Target <- c()#
+rejected_trials <- c() # to save the number of the trials rejected#
+#BLINK REJECTION#
+Pupil[LDiaXmm == 0 | LDiaYmm == 0] <- NA #if one of the two is 0 (there is a blink), we assign "Not a Number" to LMapDiamm#
+Pupil[LDiaXmm == 0 | LDiaYmm == 0] <- NA#
+# While Loop to compute means based on the markers position in the idf file LMapDiamm#
+i = 1#
+while (i < length(marker)) {#
+    #we check if we need to reject the trial#
+    reject_trial <- FALSE#
+    positions <- Time > Time[marker[i+3]] & Time < Time[marker[i+4]] # positions between marker4 and marker5#
+    aux_X <- PosX[positions] #component X of the point of regard between marker4 and marker5#
+    aux_Y <- PosY[positions] #component Y of the point of regard between marker4 and marker5#
+    aux_T <- Time[positions] # timestamps between marker4 and marker5#
+    #we want to add to the vector the previous datapoint to the first datapoint marked by positions, in order to have also the difference of timestamps for the first datapoint#
+    index_positions <- which(positions == TRUE)#
+    positions_mod <- c(index_positions[1]-1, index_positions)#
+    aux_Td <- diff(Time[positions_mod]) #difference between consecutive timestamps between marker4 and marker5#
+    rejectable_X <- (aux_X > CENTER_X + MARGIN_X | aux_X < CENTER_X - MARGIN_X) #saves TRUE when the component X is outside the range#
+    rejectable_Y <- (aux_Y > CENTER_Y + MARGIN_Y | aux_Y < CENTER_Y - MARGIN_Y) #saves TRUE when the component Y is outside the range#
+    rejectable <- rejectable_X | rejectable_Y   #merge rejectable_X and rejectable_Y (saves TRUE when at least one of them is TRUE)#
+    rejectable_positions <- which (rejectable == TRUE) #saves the positions where component X or component Y are outside range#
+    j <- 1 #index to go through the rejectable_positions vector#
+    #while we don't reject the trial and we haven't gone through all the rejectable positions (rejectable datapoints)#
+    while ( (reject_trial == FALSE) && (j < length(rejectable_positions)) ) {#
+        k <- rejectable_positions[j] ##index to go through the aux_Td, aux_T and rejectable vectors#
+        diffs_in_window <- aux_Td[aux_T >= aux_T[k] & aux_T <= (aux_T[k]+WINDOW)] #subvector of differences in timestamps in window from aux_T[k] to aux_T[k] + WINDOW#
+        rejectable_in_window <- rejectable[aux_T >= aux_T[k] & aux_T <= (aux_T[k]+WINDOW)] #subvector of rejectable datapoints in window from aux_T[k] to aux_T[k] + WINDOW#
+        if (sum(diffs_in_window[rejectable_in_window]) > THRESHOLD) { # if the sum of differences in timestamps of the rejectable datapoints in the specified window is greater that the threshold#
+            reject_trial <- TRUE #we reject the trial!#
+        }#
+        j = j+1#
+    }#
+    #We compute means and Max, OMITING "Not a Number" VALUES (therefore, not including blinks in the calculation)#
+    if (reject_trial == FALSE) { # if we did not reject the trial#
+        timeIni = Time[marker[i]] # i.e., TrialStart&PbOn#
+        timeEnd = Time[marker[i+1]] # i.e., PbOff&SwordOn#
+        d <- Pupil[Time > timeIni & Time < timeEnd]#
+        d <- outliers(d) # remove outliers#
+        meanBasePriorContext = c(meanBasePriorContext, mean(d, na.rm =TRUE))#
+        timeIni = timeEnd # i.e., PbOff&SwordOn#
+        timeEnd = Time[marker[i+2]] # i.e., SwordOff&PbOn#
+        d <- Pupil[Time > timeIni & Time < timeEnd]#
+        time_window <- Time[Time > timeIni & Time < timeEnd]#
+        res <- smoothAVG(d, time_window, MILLISECSTOAVG) #smooth the data#
+        d <- res[1,]#
+        time_window <- res[2,]#
+        d <- outliers(d) # remove outliers#
+        maxDilat_Context = c(maxDilat_Context, max(d, na.rm =TRUE))#
+        timeIni = timeEnd # i.e., SwordOff&PbOn#
+        timeEnd = Time[marker[i+3]] #i.e., PbOff&TnoTOn#
+        d <- Pupil[Time > timeIni & Time < timeEnd]#
+        d <- outliers(d) # remove outliers#
+        meanBasePriorTarget = c(meanBasePriorTarget, mean(d, na.rm =TRUE))#
+        timeIni = Time[marker[i+3]] #i.e., PbOff&TnoTOn#
+        timeEnd = Time[marker[i+5]] # i.e., TrialEnd#
+        d <- Pupil[Time > timeIni & Time < timeEnd]#
+        time_window <- Time[Time > timeIni & Time < timeEnd]#
+        res <- smoothAVG(d, time_window, MILLISECSTOAVG) #smooth the data (both time vector and pupilvalues vector#
+        d <- res[1,]#
+        time_window <- res[2,]#
+        d <- outliers(d) # remove outliers#
+        maxDilat_Target = c(maxDilat_Target, max(d, na.rm =TRUE))#
+        maxDilat_Latency_Target <- c(maxDilat_Latency_Target, time_window[which.max(d)] - time_window[1]) #output in microseconds#
+    }#
+    else { #if we rejected the trial#
+        rejected_trials <- c(rejected_trials, ((i%/%6)+1)) # to write the rejected trial number#
+    }#
+    i = i+6#
+}#
+#Now we have one value for each trial inside meanBasePriorContext, meanContext, etc.#
+#we write it down:#
+data = cbind(meanBasePriorContext,maxDilat_Context,meanBasePriorTarget,maxDilat_Target,maxDilat_Latency_Target)#
+write.table(data,"Cleaned_Sj_51_FINAL_SCRIPT_BASIC_FEATURES_Mean_Base_&_MaxDilat.txt",row.names=F, sep = "\t", dec = ",")#
+write(rejected_trials,"Cleaned_Sj_51_FINAL_SCRIPT_BASIC_FEATURES_Trial_rejected.txt")#
+}#
+outliers <- function (d) {#
+    s <- quantile(d, na.rm =TRUE, names=FALSE)#
+    minVal <- s[2] - 1.5*IQR(d,na.rm =TRUE)#
+    maxVal <- s[4] + 1.5*IQR(d,na.rm =TRUE)#
+    d[d > maxVal] <- NA#
+    d[d < minVal] <- NA#
+    return (d)#
+}#
+smoothAVG <- function(d, time_window, m) {#
+    m <- m*1000 #The actual timestamps are in microseconds!#
+    res <- c()#
+    a <- c()#
+    b <- c()#
+    timeIni <- time_window[1]#
+    timeEnd <- timeIni + m#
+    while (timeIni <= time_window[length(time_window)]) {#
+        a <- c(a, mean(d[time_window >= timeIni & time_window <= timeEnd], na.rm=TRUE))#
+        b <- c(b,mean(time_window[time_window >= timeIni & time_window <= timeEnd], na.rm=TRUE))#
+        timeIni <- timeEnd +1#
+        timeEnd <- timeIni + m#
+    }#
+    c <- rbind(a,b)#
+    return (c)#
+}
+ls()
+ls(_)
+ls()
+help (erpR)
+help (erp)
+install.packages("erpR")
+install.packages("akima")
+find.package(erpR)
+library(erpR)
+help(erpR)
+ls()
+setwd("/Volumes/SANDISK32G/toolbox4Matlab - CleanPupil/")
+p_db <- read.table("MindSeeCollaborativeStudy2015_hf_cr_VPpah Samples.txt", header = TRUE, fill=TRUE, colClasses = c("LDiaXmm" = "character"))#
+str(p_db)#
+#
+# The variable marker has the indexes of the timestamps of the SendImageMessages of E-Prime#
+marker = which(p_db$Type == "MSG")#
+# Database with a column (MeanP = Mean Pupil)  that is the results of mean (LMapDiamm and RMapDiamm) #
+p_db2 <- transform(p_db, Pupil = rowMeans(p_db[,c(6,9)])) #
+str(p_db2)#
+#
+# Database with a column (PosX) that is the results of mean (LPosX and RPosX) #
+p_db3 <- transform(p_db2, PosX = rowMeans(p_db2[,c(10,12)])) #
+str(p_db3)#
+#
+# Database (def_db = definitive database) with a column (PosY) that is the results of mean (LPosY and RPosY)#
+def_db <-  transform(p_db3, PosY = rowMeans(p_db3[,c(11,13)])) #
+str(def_db)#
+# Removing all column that are not useful#
+def_db$LPosX      <- NULL#
+def_db$LPosY      <- NULL#
+def_db$RPosX     <- NULL#
+def_db$RPosY      <- NULL#
+#
+def_db$LMapDiamm <- NULL#
+def_db$RMapDiamm <- NULL#
+#
+def_db$Timing <- NULL  #
+def_db$LatencyLFValidity<- NULL#
+def_db$RGValidity<- NULL #
+def_db$PupilConfidence<- NULL#
+def_db$Frame<- NULL#
+def_db$Aux1<- NULL#
+#
+str(def_db)#
+attach(def_db)#
+#
+# Loop to write in the column $Trial the right number of the trial based on the markers#
+def_db$Trial[1:length(def_db$Trial)] <- NA#
+#
+str(def_db)#
+#
+tail(def_db, n = 10)#
+#
+i =1 #
+#
+timeIni = Time[marker[i]] # i.e., TrialStart&PbOn	#
+timeEnd =  Time[marker[i+5]] # i.e., TrialEnd#
+while (i < length(marker)){#
+        {#
+		timeIni = Time[marker[i]] # i.e., TrialStart&PbOn	#
+		timeEnd =  Time[marker[i+5]] # i.e., TrialEnd I put i + 6 instead of i + 5 for the reason that in this way it will write 12121212 #
+        def_db$Trial[Time > timeIni & Time < timeEnd] <- (i%/%6 + 1)#
+        }#
+     i = i+6#
+}#
+#
+# tail(def_db, n = 10) to check the last ten rows of a dataframe #
+# print (length(marker)/6) to check the trial number#
+#
+str(def_db)#
+#
+def_db$Trial
+write.table(def_db,"Cleaned_Prova_Collaborative.txt",row.names=F, sep = "\t", dec = ",")
