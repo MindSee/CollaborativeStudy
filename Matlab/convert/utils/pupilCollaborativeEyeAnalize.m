@@ -17,7 +17,7 @@ try
     % Nargin
     if nargin < 2
         % Get Data File
-        [inputName, inputPath] = uigetfile({'*.xlsx; *.xls; *.mat'}, 'Pick a Eye Tracker File [.xlsx, .xls, .mat]');
+        [inputName, inputPath] = uigetfile({'*.xlsx; *.xls; *.mat; *.txt'}, 'Pick a Eye Tracker File [.xlsx, .xls, .mat, .txt]');
         if nargin < 1
             threesholdTrials = 1;
         end

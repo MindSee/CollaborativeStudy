@@ -1,8 +1,8 @@
-function [eye] = pupilCollaborativeEyeMovements(input)
+function [eye] = pupilCollaborativeEyeMovements(input, checkDisp)
 % --
 %
 %   Syntax:
-%          [eye] = pupilCollaborativeEyeMovements(input)
+%          [eye] = pupilCollaborativeEyeMovements(input, checkDisp)
 %
 %   Parameters:
 %           --
@@ -15,14 +15,17 @@ function [eye] = pupilCollaborativeEyeMovements(input)
 
 try
     % Nargin
-    if nargin < 1
-        [eye] = pupilBinocularData();
-    else
-        % Get RAW
-        if isstruct(input)
-            [eye] = input;
+    if nargin < 2
+        checkDisp = false;
+        if nargin < 1
+            [eye] = pupilBinocularData();
         else
-            [eye] = pupilBinocularData(input);
+            % Get RAW
+            if isstruct(input)
+                [eye] = input;
+            else
+                [eye] = pupilBinocularData(input);
+            end
         end
     end
     
@@ -31,7 +34,9 @@ try
     for iTrial = 1 : length(eye.events.trial)
         if (strfind(eye.events.description{iTrial, 1}, '_Start_'))
             
-            disp('');
+            if checkDisp
+                disp('');
+            end
             
             % Counter
             iStimulus = iStimulus + 1;
@@ -41,9 +46,10 @@ try
             eye.movements.simbol{iStimulus, 1} = eye.events.description{iTrial, 1}((separator(1, 2) + 1) : separator(1, 2) + 2);
             eye.movements.focus{iStimulus, 1} = eye.events.description{iTrial, 1}((separator(1, 3) + 1) : separator(1, 3) + 2);
             eye.movements.target{iStimulus, 1} = eye.events.description{iTrial, 1}((separator(1, 4) + 1) : separator(1, 4) + 2);
-            disp(['Trial [number: ', num2str(eye.events.trial(iTrial, 1)), '] [simbol: ', eye.movements.simbol{iStimulus, 1}, '] [focus: ', eye.movements.focus{iStimulus, 1}, '] [stimulus: ', eye.movements.target{iStimulus, 1}, ']']);
             
-            
+            if checkDisp
+                disp(['Trial [number: ', num2str(eye.events.trial(iTrial, 1)), '] [simbol: ', eye.movements.simbol{iStimulus, 1}, '] [focus: ', eye.movements.focus{iStimulus, 1}, '] [stimulus: ', eye.movements.target{iStimulus, 1}, ']']);
+            end
             
             % % Blink
             eye.movements.blink.number(iStimulus, 1) = 0;
@@ -62,11 +68,11 @@ try
                 eye.movements.blink.duration.mean(iStimulus, 1) = pupilDataControl((eye.movements.blink.duration.total(iStimulus, 1)/eye.movements.blink.number(iStimulus, 1)));
             end
             
-            disp(['    BLINK [nr.: ', num2str(eye.movements.blink.number(iStimulus, 1)), ']']);
-            disp(['         duration tot.     = ', num2str(eye.movements.blink.duration.total(iStimulus, 1))]);
-            disp(['         duration mean     = ', num2str(eye.movements.blink.duration.mean(iStimulus, 1))]);
-            
-            
+            if checkDisp
+                disp(['    BLINK [nr.: ', num2str(eye.movements.blink.number(iStimulus, 1)), ']']);
+                disp(['         duration tot.     = ', num2str(eye.movements.blink.duration.total(iStimulus, 1))]);
+                disp(['         duration mean     = ', num2str(eye.movements.blink.duration.mean(iStimulus, 1))]);
+            end
             
             % % Saccade
             eye.movements.saccade.number(iStimulus, 1) = 0;
@@ -90,13 +96,13 @@ try
                 eye.movements.saccade.speed.mean(iStimulus, 1) = pupilDataControl((eye.movements.saccade.speed.total(iStimulus, 1)/eye.movements.saccade.number(iStimulus, 1)));
             end
             
-            disp(['  SACCADE [nr.: ', num2str(eye.movements.saccade.number(iStimulus, 1)), ']']);
-            disp(['         duration tot.     = ', num2str(eye.movements.saccade.duration.total(iStimulus, 1))]);
-            disp(['         duration mean     = ', num2str(eye.movements.saccade.duration.mean(iStimulus, 1))]);
-            disp(['         speed tot.        = ', num2str(eye.movements.saccade.speed.total(iStimulus, 1))]);
-            disp(['         speed mean        = ', num2str(eye.movements.saccade.speed.mean(iStimulus, 1))]);
-            
-            
+            if checkDisp
+                disp(['  SACCADE [nr.: ', num2str(eye.movements.saccade.number(iStimulus, 1)), ']']);
+                disp(['         duration tot.     = ', num2str(eye.movements.saccade.duration.total(iStimulus, 1))]);
+                disp(['         duration mean     = ', num2str(eye.movements.saccade.duration.mean(iStimulus, 1))]);
+                disp(['         speed tot.        = ', num2str(eye.movements.saccade.speed.total(iStimulus, 1))]);
+                disp(['         speed mean        = ', num2str(eye.movements.saccade.speed.mean(iStimulus, 1))]);
+            end
             
             % % Fixation
             eye.movements.fixations.number(iStimulus, 1) = 0;
@@ -124,17 +130,19 @@ try
             
             eye.movements.fixations.pupil.size.x.max(iStimulus, 1) = pupilDataControl(max(temp.movements.fixations.pupil.size.x.max));
             
-            
-            disp([' FIXATION [nr.: ', num2str(eye.movements.fixations.number(iStimulus, 1)), ']']);
-            disp(['         duration tot.     = ', num2str(eye.movements.fixations.duration.total(iStimulus, 1))]);
-            disp(['         duration mean     = ', num2str(eye.movements.fixations.duration.mean(iStimulus, 1))]);
-            disp(['         pupil size X mean = ', num2str(eye.movements.fixations.pupil.size.x.mean(iStimulus, 1))]);
-            disp(['         pupil size X max  = ', num2str(eye.movements.fixations.pupil.size.x.max(iStimulus, 1))]);
-            
-            disp(' ');
+            if checkDisp
+                disp([' FIXATION [nr.: ', num2str(eye.movements.fixations.number(iStimulus, 1)), ']']);
+                disp(['         duration tot.     = ', num2str(eye.movements.fixations.duration.total(iStimulus, 1))]);
+                disp(['         duration mean     = ', num2str(eye.movements.fixations.duration.mean(iStimulus, 1))]);
+                disp(['         pupil size X mean = ', num2str(eye.movements.fixations.pupil.size.x.mean(iStimulus, 1))]);
+                disp(['         pupil size X max  = ', num2str(eye.movements.fixations.pupil.size.x.max(iStimulus, 1))]);
+                disp(' ');
+            end
         end
     end
     
-    disp('........      ........      ........      ........      ........'); disp(' ');
+    if checkDisp
+        disp('........      ........      ........      ........      ........'); disp(' ');
+    end
     
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end

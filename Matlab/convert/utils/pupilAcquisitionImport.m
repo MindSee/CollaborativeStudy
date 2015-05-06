@@ -22,7 +22,7 @@ try
     if nargin < 2
         checkSave = true;
         if nargin < 1
-            [inputName, inputPath] = uigetfile({'*.xlsx; *.xls; *.mat'}, 'Pick a Eye Tracker File [.xlsx, .xls, .mat]');
+            [inputName, inputPath] = uigetfile({'*.xlsx; *.xls; *.mat; *.txt'}, 'Pick a Eye Tracker File [.xlsx, .xls, .mat, .txt]');
             input = [inputPath, inputName];
         end
     end
@@ -50,7 +50,7 @@ try
             else
                 disp('Can''t read the file, check the file extension.')
             end
-        elseif isTXT(fileTXT)
+        elseif isTXT(input)
             fid = fopen(input);
             iRow = 0;
             textLine = fgetl(fid);
@@ -68,6 +68,8 @@ try
                 textLine = fgetl(fid);
             end
             fclose(fid);
+        else
+            disp('Can''t read the file, check the file extension.')
         end
     end
     
