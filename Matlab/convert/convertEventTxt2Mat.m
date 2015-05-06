@@ -26,7 +26,7 @@ function [eye, eyes] = convertEventTxt2Mat(input, checkSave)
 %                              > saccade:   number, start, end, duration, location, start (x, y), stop (x, y), amplitude, speed (peak (to, from), average), acceleration (peak, average), deceleration (peak, average), trial
 %                              > fixations: number, start, end, duration, location, dispersion, plane, pupil, trial
 %
-% 
+%
 %           eyes                    Struct of the event information for
 %                                   both eyes. The tree of the structure:
 %
