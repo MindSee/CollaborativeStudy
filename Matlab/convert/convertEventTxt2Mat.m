@@ -22,13 +22,11 @@ function [eye, eyes] = convertEventTxt2Mat(input, checkSave)
 %
 %                              > info:     file, version, sampleRate, date
 %                              > events:   trial, number, start, description
-%                              > left:     blink:     number, start, end, duration, trial
-%                                          saccade:   number, start, end, duration, location, start (x, y), stop (x, y), amplitude, speed (peak (to, from), average), acceleration (peak, average), deceleration (peak, average), trial
-%                                          fixations: number, start, end, duration, location, dispersion, plane, pupil, trial
-%                              > right:    blink:     number, start, end, duration, trial
-%                                          saccade:   number, start, end, duration, location, start (x, y), stop (x, y), amplitude, speed (peak (to, from), average), acceleration (peak, average), deceleration (peak, average), trial
-%                                          fixations: number, start, end, duration, location, dispersion, plane, pupil, trial
+%                              > blink:     number, start, end, duration, trial
+%                              > saccade:   number, start, end, duration, location, start (x, y), stop (x, y), amplitude, speed (peak (to, from), average), acceleration (peak, average), deceleration (peak, average), trial
+%                              > fixations: number, start, end, duration, location, dispersion, plane, pupil, trial
 %
+% 
 %           eyes                    Struct of the event information for
 %                                   both eyes. The tree of the structure:
 %
@@ -354,7 +352,7 @@ try
     
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function [eye, eyes] = convertEyes2Eye(input)
+function eye = convertEyes2Eye(input)
 % Convert the eyes structure into a eye structure, that contains the mean
 % of the values.
 %
