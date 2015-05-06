@@ -16,13 +16,13 @@ function [eye, eyes] = pupilBinocularData(input)
 try
     % Nargin
     if nargin < 1
-        [eyes] = pupilStructData();
+        [eyes] = convertEventTxt2Mat();
     else
         % Get RAW
         if isstruct(input)
             [eyes] = input;
         else
-            [eyes] = pupilStructData(input);
+            [eyes] = convertEventTxt2Mat(input);
         end
     end
     

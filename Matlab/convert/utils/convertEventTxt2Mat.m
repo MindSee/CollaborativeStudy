@@ -1,14 +1,71 @@
-function [eyes] = pupilStructData(input, checkSave)
-% --
+function [eyes] = convertEventTxt2Mat(input, checkSave)
+% Convert the Event idf-converted file into a .mat struct.
 %
 %   Syntax:
-%          [eyes] = pupilStructData(input, checkSave)
+%          [eyes] = convertEventTxt2Mat()
+%          [eyes] = convertEventTxt2Mat(input)
+%          [eyes] = convertEventTxt2Mat(input, checkSave)
 %
 %   Parameters:
-%           --
+%           input                   file name of the idf-converted file.
+%                                   The file exension allow are:
+%                                       - xls
+%                                       - xlsx
+%                                       - txt
+%                                       - mat
+%           checkSave               true if you want to save a .mat copy of
+%                                   the raw data
 %
 %   Return values:
-%           --
+%           eyes                    Struct of the event information. The
+%                                   tree of the structure:
+%
+%        eyes
+%           > info
+%                  > file
+%                  > version
+%                  > sampleRate
+%                  > date
+%           > events
+%                  > trial
+%                  > number
+%                  > start
+%                  > description
+%           > left
+%                  > blink
+%                          > number
+%                          > start
+%                          > end
+%                          > duration
+%                          > trial
+%                  > saccade
+%                          > number
+%                          > start
+%                          > end
+%                          > duration
+%                          > location
+%                                      > start
+%                                              > x 
+%                                              > y
+%                                      > stop
+%                                              > x 
+%                                              > y
+%                          > amplitude
+%                          > speed
+%                                      > peak
+%                                              > to
+%                                              > from
+%                                      > average
+%                          > acceleration
+%                                      > peak
+%                                      > average
+%                          > deceleration
+%                                      > peak
+%                                      > average
+%                          > trial
+%                  > fixations
+%           > right (equal of left)
+%
 %
 %	Author: Filippo M.  18/03/2015
 
@@ -17,19 +74,19 @@ try
     % Nargin
     if nargin < 2
         checkSave = false;
-        if nargin < 1
-            [RAW] = pupilAcquisitionImport();
+    end
+    if nargin < 1
+        [RAW] = pupilAcquisitionImport();
+    else
+        % Get RAW
+        if isstruct(input)
+            [RAW] = input;
         else
-            % Get RAW
-            if isstruct(input)
-                [RAW] = input;
-            else
-                [RAW] = pupilAcquisitionImport(input, checkSave);
-            end
+            [RAW] = pupilAcquisitionImport(input, checkSave);
         end
     end
     
-    % Parameters
+    % Initialization Event Struct
     eyes = struct('info', struct('sampleRate', [], 'version', [], 'file', [], 'date', []), ...
         'events', struct('trial', [], 'number', [], 'start', [], 'description', []), ...
         'left', struct(...
@@ -72,7 +129,7 @@ try
             
             for irRAW = 1 : rRAW
                 if strfind(RAW{irRAW, 1}, 'Sample Rate:')
-                    eyes.info.sampleRate = RAW{irRAW, 2};
+                    eyes.info.sampleRate = str2double(RAW{irRAW, 2});
                 elseif strfind(RAW{irRAW, 1}, 'Version:')
                     eyes.info.version = RAW{irRAW, 2};
                 elseif strfind(RAW{irRAW, 1}, 'Converted from:')
@@ -83,32 +140,32 @@ try
                 elseif strfind(RAW{irRAW, 1}, 'UserEvent')                 % Event
                     iEvents = iEvents + 1;
                     eyes.events.trial(iEvents, 1) = iEvents;
-                    eyes.events.number(iEvents, 1) = RAW{irRAW, 3};
-                    eyes.events.start(iEvents, 1) = RAW{irRAW, 4};
+                    eyes.events.number(iEvents, 1) = str2double(RAW{irRAW, 3});
+                    eyes.events.start(iEvents, 1) = str2double(RAW{irRAW, 4});
                     eyes.events.description{iEvents, 1} = RAW{irRAW, 5}(12 : end);
                     
                 elseif strfind(RAW{irRAW, 1}, 'Blink L')                   % Blink
                     iLeftBlinks = iLeftBlinks + 1;
-                    eyes.left.blink.trial(iLeftBlinks, 1) = RAW{irRAW, 2};
-                    eyes.left.blink.number(iLeftBlinks, 1) = RAW{irRAW, 3};
-                    eyes.left.blink.start(iLeftBlinks, 1) = RAW{irRAW, 4};
-                    eyes.left.blink.end(iLeftBlinks, 1) = RAW{irRAW, 5};
-                    eyes.left.blink.duration(iLeftBlinks, 1) = RAW{irRAW, 6};
+                    eyes.left.blink.trial(iLeftBlinks, 1) = str2double(RAW{irRAW, 2});
+                    eyes.left.blink.number(iLeftBlinks, 1) = str2double(RAW{irRAW, 3});
+                    eyes.left.blink.start(iLeftBlinks, 1) = str2double(RAW{irRAW, 4});
+                    eyes.left.blink.end(iLeftBlinks, 1) = str2double(RAW{irRAW, 5});
+                    eyes.left.blink.duration(iLeftBlinks, 1) = str2double(RAW{irRAW, 6});
                 elseif strfind(RAW{irRAW, 1}, 'Blink R')
                     iRightBlinks = iRightBlinks + 1;
-                    eyes.right.blink.trial(iRightBlinks, 1) = RAW{irRAW, 2};
-                    eyes.right.blink.number(iRightBlinks, 1) = RAW{irRAW, 3};
-                    eyes.right.blink.start(iRightBlinks, 1) = RAW{irRAW, 4};
-                    eyes.right.blink.end(iRightBlinks, 1) = RAW{irRAW, 5};
-                    eyes.right.blink.duration(iRightBlinks, 1) = RAW{irRAW, 6};
+                    eyes.right.blink.trial(iRightBlinks, 1) = str2double(RAW{irRAW, 2});
+                    eyes.right.blink.number(iRightBlinks, 1) = str2double(RAW{irRAW, 3});
+                    eyes.right.blink.start(iRightBlinks, 1) = str2double(RAW{irRAW, 4});
+                    eyes.right.blink.end(iRightBlinks, 1) = str2double(RAW{irRAW, 5});
+                    eyes.right.blink.duration(iRightBlinks, 1) = str2double(RAW{irRAW, 6});
                     
                 elseif strfind(RAW{irRAW, 1}, 'Saccade L')                 % Saccade
                     iLeftSaccades = iLeftSaccades + 1;
-                    eyes.left.saccade.trial(iLeftSaccades, 1) = RAW{irRAW, 2};
-                    eyes.left.saccade.number(iLeftSaccades, 1) = RAW{irRAW, 3};
-                    eyes.left.saccade.start(iLeftSaccades, 1) = RAW{irRAW, 4};
-                    eyes.left.saccade.end(iLeftSaccades, 1) = RAW{irRAW, 5};
-                    eyes.left.saccade.duration(iLeftSaccades, 1) = RAW{irRAW, 6};
+                    eyes.left.saccade.trial(iLeftSaccades, 1) = str2double(RAW{irRAW, 2});
+                    eyes.left.saccade.number(iLeftSaccades, 1) = str2double(RAW{irRAW, 3});
+                    eyes.left.saccade.start(iLeftSaccades, 1) = str2double(RAW{irRAW, 4});
+                    eyes.left.saccade.end(iLeftSaccades, 1) = str2double(RAW{irRAW, 5});
+                    eyes.left.saccade.duration(iLeftSaccades, 1) = str2double(RAW{irRAW, 6});
                     eyes.left.saccade.location.start.x(iLeftSaccades, 1) = str2double(RAW{irRAW, 7});
                     eyes.left.saccade.location.start.y(iLeftSaccades, 1) = str2double(RAW{irRAW, 8});
                     eyes.left.saccade.location.stop.x(iLeftSaccades, 1) = str2double(RAW{irRAW, 9});
@@ -122,11 +179,11 @@ try
                     eyes.left.saccade.acceleration.average(iLeftSaccades, 1) = str2double(RAW{irRAW, 17});
                 elseif strfind(RAW{irRAW, 1}, 'Saccade R')
                     iRightSaccades = iRightSaccades + 1;
-                    eyes.right.saccade.trial(iRightSaccades, 1) = RAW{irRAW, 2};
-                    eyes.right.saccade.number(iRightSaccades, 1) = RAW{irRAW, 3};
-                    eyes.right.saccade.start(iRightSaccades, 1) = RAW{irRAW, 4};
-                    eyes.right.saccade.end(iRightSaccades, 1) = RAW{irRAW, 5};
-                    eyes.right.saccade.duration(iRightSaccades, 1) = RAW{irRAW, 6};
+                    eyes.right.saccade.trial(iRightSaccades, 1) = str2double(RAW{irRAW, 2});
+                    eyes.right.saccade.number(iRightSaccades, 1) = str2double(RAW{irRAW, 3});
+                    eyes.right.saccade.start(iRightSaccades, 1) = str2double(RAW{irRAW, 4});
+                    eyes.right.saccade.end(iRightSaccades, 1) = str2double(RAW{irRAW, 5});
+                    eyes.right.saccade.duration(iRightSaccades, 1) = str2double(RAW{irRAW, 6});
                     eyes.right.saccade.location.start.x(iRightSaccades, 1) = str2double(RAW{irRAW, 7});
                     eyes.right.saccade.location.start.y(iRightSaccades, 1) = str2double(RAW{irRAW, 8});
                     eyes.right.saccade.location.stop.x(iRightSaccades, 1) = str2double(RAW{irRAW, 9});
@@ -141,11 +198,11 @@ try
                     
                 elseif strfind(RAW{irRAW, 1}, 'Fixation L')                % Fixation
                     iLeftFixations = iLeftFixations + 1;
-                    eyes.left.fixations.trial(iLeftFixations, 1) = RAW{irRAW, 2};
-                    eyes.left.fixations.number(iLeftFixations, 1) = RAW{irRAW, 3};
-                    eyes.left.fixations.start(iLeftFixations, 1) = RAW{irRAW, 4};
-                    eyes.left.fixations.end(iLeftFixations, 1) = RAW{irRAW, 5};
-                    eyes.left.fixations.duration(iLeftFixations, 1) = RAW{irRAW, 6};
+                    eyes.left.fixations.trial(iLeftFixations, 1) = str2double(RAW{irRAW, 2});
+                    eyes.left.fixations.number(iLeftFixations, 1) = str2double(RAW{irRAW, 3});
+                    eyes.left.fixations.start(iLeftFixations, 1) = str2double(RAW{irRAW, 4});
+                    eyes.left.fixations.end(iLeftFixations, 1) = str2double(RAW{irRAW, 5});
+                    eyes.left.fixations.duration(iLeftFixations, 1) = str2double(RAW{irRAW, 6});
                     eyes.left.fixations.location.x(iLeftFixations, 1) = str2double(RAW{irRAW, 7});
                     eyes.left.fixations.location.y(iLeftFixations, 1) = str2double(RAW{irRAW, 8});
                     eyes.left.fixations.dispersion.x(iLeftFixations, 1) = str2double(RAW{irRAW, 9});
@@ -155,11 +212,11 @@ try
                     eyes.left.fixations.pupil.size.y(iLeftFixations, 1) = str2double(RAW{irRAW, 13});
                 elseif strfind(RAW{irRAW, 1}, 'Fixation R')
                     iRightFixations = iRightFixations + 1;
-                    eyes.right.fixations.trial(iRightFixations, 1) = RAW{irRAW, 2};
-                    eyes.right.fixations.number(iRightFixations, 1) = RAW{irRAW, 3};
-                    eyes.right.fixations.start(iRightFixations, 1) = RAW{irRAW, 4};
-                    eyes.right.fixations.end(iRightFixations, 1) = RAW{irRAW, 5};
-                    eyes.right.fixations.duration(iRightFixations, 1) = RAW{irRAW, 6};
+                    eyes.right.fixations.trial(iRightFixations, 1) = str2double(RAW{irRAW, 2});
+                    eyes.right.fixations.number(iRightFixations, 1) = str2double(RAW{irRAW, 3});
+                    eyes.right.fixations.start(iRightFixations, 1) = str2double(RAW{irRAW, 4});
+                    eyes.right.fixations.end(iRightFixations, 1) = str2double(RAW{irRAW, 5});
+                    eyes.right.fixations.duration(iRightFixations, 1) = str2double(RAW{irRAW, 6});
                     eyes.right.fixations.location.x(iRightFixations, 1) = str2double(RAW{irRAW, 7});
                     eyes.right.fixations.location.y(iRightFixations, 1) = str2double(RAW{irRAW, 8});
                     eyes.right.fixations.dispersion.x(iRightFixations, 1) = str2double(RAW{irRAW, 9});
@@ -275,7 +332,6 @@ try
                 disp('Can''t find the RAW TABLE variables.')
             end
         elseif (isXLSX(input) || isXLS(input))
-            
             [TABLE, TXT, RAW] = xlsread(input); clear TXT
             [TABLE, TXT, RAW] = xlsread(input); clear TXT
             
