@@ -26,7 +26,7 @@ function [eye, eyes] = convertEventTxt2Mat(input, checkSave)
 %                              > saccade:   number, start, end, duration, location, start (x, y), stop (x, y), amplitude, speed (peak (to, from), average), acceleration (peak, average), deceleration (peak, average), trial
 %                              > fixations: number, start, end, duration, location, dispersion, plane, pupil, trial
 %
-% 
+%
 %           eyes                    Struct of the event information for
 %                                   both eyes. The tree of the structure:
 %
@@ -262,7 +262,6 @@ try
             
             % Monocular data
             eye = convertEyes2Eye(eyes);
-            save('debug', 'eye')
             
         elseif checkSample
             % disp('Sample')
@@ -352,7 +351,7 @@ try
     
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function eye = convertEyes2Eye(input)
+function [eye] = convertEyes2Eye(input)
 % Convert the eyes structure into a eye structure, that contains the mean
 % of the values.
 %
@@ -577,7 +576,7 @@ try
     
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function res = isTXT(fileTXT)
+function [res] = isTXT(fileTXT)
 try
     % Variables
     res = false;
@@ -590,7 +589,7 @@ try
     end
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function res = isXLS(fileXLS)
+function [res] = isXLS(fileXLS)
 try
     % Variables
     res = false;
@@ -603,7 +602,7 @@ try
     end
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function res = isXLSX(fileXLSX)
+function [res] = isXLSX(fileXLSX)
 try
     % Variables
     res = false;
@@ -616,7 +615,7 @@ try
     end
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function res = isMAT(fileMAT)
+function [res] = isMAT(fileMAT)
 try
     % Variables
     res = false;
