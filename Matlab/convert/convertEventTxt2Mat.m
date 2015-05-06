@@ -1,10 +1,10 @@
-function [eyes, eye] = convertEventTxt2Mat(input, checkSave)
+function [eye, eyes] = convertEventTxt2Mat(input, checkSave)
 % Convert the Event idf-converted file into a .mat struct.
 %
 %   Syntax:
-%          [eyes, eye] = convertEventTxt2Mat()
-%          [eyes, eye] = convertEventTxt2Mat(input)
-%          [eyes, eye] = convertEventTxt2Mat(input, checkSave)
+%          [eye, eyes] = convertEventTxt2Mat()
+%          [eye, eyes] = convertEventTxt2Mat(input)
+%          [eye, eyes] = convertEventTxt2Mat(input, checkSave)
 %
 %   Parameters:
 %           input                   file name of the idf-converted file.
@@ -17,8 +17,8 @@ function [eyes, eye] = convertEventTxt2Mat(input, checkSave)
 %                                   the raw data.
 %
 %   Return values:
-%           eyes                    Struct of the event information for
-%                                   both eyes. The tree of the structure:
+%           eye                     Struct of the event information for
+%                                   mean of the left and right eyes.
 %
 %                              > info:     file, version, sampleRate, date
 %                              > events:   trial, number, start, description
@@ -29,9 +29,8 @@ function [eyes, eye] = convertEventTxt2Mat(input, checkSave)
 %                                          saccade:   number, start, end, duration, location, start (x, y), stop (x, y), amplitude, speed (peak (to, from), average), acceleration (peak, average), deceleration (peak, average), trial
 %                                          fixations: number, start, end, duration, location, dispersion, plane, pupil, trial
 %
-%
-%           eye                     Struct of the event information for
-%                                   mean of the left and right eyes.
+%           eyes                    Struct of the event information for
+%                                   both eyes. The tree of the structure:
 %
 %                              > info:     file, version, sampleRate, date
 %                              > events:   trial, number, start, description
@@ -265,6 +264,7 @@ try
             
             % Monocular data
             eye = convertEyes2Eye(eyes);
+            save('debug', 'eye')
             
         elseif checkSample
             % disp('Sample')
