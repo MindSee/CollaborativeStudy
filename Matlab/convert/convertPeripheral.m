@@ -14,11 +14,11 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         % EEG and corresponding ET file
         file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);        
         
-        % load file header
+        % Load file header
         hdr= file_readBVheader(file);
         fs_orig=hdr.fs;
         
-        % low-pass filter for anti-aliasing
+        % Low-pass filter for anti-aliasing
         Wps = [100 120]/hdr.fs*2; % for Fs=250
         [n, Ws] = cheb2ord(Wps(1), Wps(2), 3, 40);
         [filt.b, filt.a]= cheby2(n, 50, Ws);
@@ -28,9 +28,11 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         clabNonScalp= hdr.clab(util_chanind(hdr.clab, 'not',clabScalp));
 
         
-        % load raw data, downsampling is done while loading
+        % Load raw data, downsampling is done while loading
         Fs = 250; % new sampling rate
-        [cnt, mrk] = file_readBV(file, 'Fs',Fs, 'Filt',filt, 'Clab', clabNonScalp);
+        [cnt, mrk] = file_readBV(file, 'Fs',Fs, 'Filt',filt, 'CLab',clabNonScalp);
+        
+        % (Re-referencing of bipolar peripheral channels not necessary - in contrast to EEG)                     
         
         % Load eye tracking data
         [ET_mrk] = readETMarkers(file);
@@ -68,13 +70,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         mnt = mnt_setElectrodePositions(cnt.clab);
         
         % arrangement for grid plots
-        grd = sprintf(['scale,F7,Fpz,F8,legend\n'...
-            'FC5,FC1,Fz,FC2,FC6\n'...
-            'T6,C3,Cz,C4,T8\n'...
-            'CP5,CP1,_,CP2,CP6\n'...
-            'P7,P3,Pz,P4,P8\n'...
-            'PO1,O1,_,O2,PO2\n'...
-            'EMGa,EMGb,_,_,EDA']);
+        grd = sprintf(['scale,scale,EMGa,EMGb,EDA,legend']);        
         mnt = mnt_setGrid(mnt, grd);
         
         %% save in matlab format        

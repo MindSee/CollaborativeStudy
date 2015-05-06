@@ -14,22 +14,30 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         % EEG and corresponding ET file
         file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);        
         
-        % load file header
+        % Load file header
         hdr= file_readBVheader(file);
         fs_orig=hdr.fs;
         
-        % low-pass filter for anti-aliasing
+        % Low-pass filter for anti-aliasing
         Wps = [100 120]/hdr.fs*2; % for Fs=250
         [n, Ws] = cheb2ord(Wps(1), Wps(2), 3, 40);
         [filt.b, filt.a]= cheby2(n, 50, Ws);
         %  freqz(filt.b,filt.a,512,hdr.fs)
         
         clabScalp= hdr.clab(util_scalpChannels(hdr.clab));
-        clabNonScalp= hdr.clab(util_chanind(hdr.clab, 'not',clabScalp));
+        %clabNonScalp= hdr.clab(util_chanind(hdr.clab, 'not',clabScalp));
         
-        % load raw data, downsampling is done while loading
+        % Load raw data, downsampling is done while loading
         Fs = 250; % new sampling rate
-        [cnt, mrk] = file_readBV(file, 'Fs',Fs, 'Filt',filt ,'Clab', clabScalp);
+        [cnt, mrk] = file_readBV(file, 'Fs',Fs, 'Filt',filt);
+        
+        % Re-reference data to the mean of the scalp channels 
+        % (To remove influence of peripheral channels due to hardware common average referencing)
+        iScalp = util_chanind(cnt.clab,clabScalp);
+        cnt.x = bsxfun(@minus,cnt.x, mean(cnt.x(:,iScalp),2) );
+        
+        % Remove non-scalp channels
+        cnt=proc_selectChannels(cnt,util_chanind(cnt, clabScalp));                        
         
         % Load eye tracking data
         [ET_mrk] = readETMarkers(file);
@@ -63,8 +71,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             'T6,C3,Cz,C4,T8\n'...
             'CP5,CP1,_,CP2,CP6\n'...
             'P7,P3,Pz,P4,P8\n'...
-            'PO1,O1,_,O2,PO2\n'...
-            'EMGa,EMGb,_,_,EDA']);
+            'PO1,O1,_,O2,PO2']);
         mnt = mnt_setGrid(mnt, grd);
         
         %% save in matlab format        
