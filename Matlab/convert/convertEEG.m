@@ -12,6 +12,7 @@ function [] = convertEEG()
 %
 %	Author: Markus W.  05/05/2015
 
+
 disp('Converting EEG signals...')
 
 global BTB

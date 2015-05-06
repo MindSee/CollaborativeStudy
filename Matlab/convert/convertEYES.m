@@ -1,4 +1,18 @@
-function convertEYES
+function [] = convertEYES()
+% Convert the Eye tracking signals.
+%
+%   Syntax:
+%          [] = convertEYES()
+%
+%   Parameters:
+%           --
+%
+%   Return values:
+%           --
+%
+%	Author: Markus W.  05/05/2015
+
+
 disp('Converting eye tracking signals...')
 
 global BTB
@@ -8,11 +22,11 @@ convertBase;
 for tp=1:numel(subdir_list) % Select one of the test persons
     
     tpcode=regexp(subdir_list{tp},'_','split');tpcode=tpcode{1};
-    BTB.Tp.Dir=fullfile(BTB.RawDir,subdir_list{tp});    
+    BTB.Tp.Dir=fullfile(BTB.RawDir,subdir_list{tp});
     for i=1:12; % Select one of the twelve files recorded for each person
         
         % EEG and corresponding ET file
-        file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);        
+        file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);
         
         % load file header
         hdr= file_readBVheader(file);
@@ -54,7 +68,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         end
         
         if MarkerMismatch
-            error(['EEG and ET markers do not match for ' file '. Skipped this file.'])            
+            error(['EEG and ET markers do not match for ' file '. Skipped this file.'])
         end
         
         % Translate EEG markers (numbers only) into meaningful names
@@ -73,9 +87,9 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             'EMGa,EMGb,_,_,EDA']);
         mnt = mnt_setGrid(mnt, grd);
         
-        %% Behavioural data        
+        %% Behavioural data
         
-        % load behavioral responses                
+        % load behavioral responses
         if isunix % Linux / Mac
             answerfile=strtrim(ls(fullfile(BTB.Tp.Dir, '*_response_session1.mat'))); load(answerfile);
             answerfile=strtrim(ls(fullfile(BTB.Tp.Dir, '*_response_session2.mat'))); load(answerfile);
@@ -100,7 +114,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         
         behaviour=struct('Answers',Answers ,'NumberOfTargets',NumberOfTargets);
         
-        %% save in matlab format        
+        %% save in matlab format
         matfilename = fullfile(BTB.MatDir,file);
         fprintf('Saving %s\n', matfilename)
         warning('off', 'MATLAB:save:versionWithAppend')
