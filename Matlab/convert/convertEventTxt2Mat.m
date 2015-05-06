@@ -262,7 +262,6 @@ try
             
             % Monocular data
             eye = convertEyes2Eye(eyes);
-            save('debug', 'eye')
             
         elseif checkSample
             % disp('Sample')
