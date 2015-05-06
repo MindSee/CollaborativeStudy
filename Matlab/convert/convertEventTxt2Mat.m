@@ -351,7 +351,7 @@ try
     
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function eye = convertEyes2Eye(input)
+function [eye] = convertEyes2Eye(input)
 % Convert the eyes structure into a eye structure, that contains the mean
 % of the values.
 %
@@ -576,7 +576,7 @@ try
     
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function res = isTXT(fileTXT)
+function [res] = isTXT(fileTXT)
 try
     % Variables
     res = false;
@@ -589,7 +589,7 @@ try
     end
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function res = isXLS(fileXLS)
+function [res] = isXLS(fileXLS)
 try
     % Variables
     res = false;
@@ -602,7 +602,7 @@ try
     end
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function res = isXLSX(fileXLSX)
+function [res] = isXLSX(fileXLSX)
 try
     % Variables
     res = false;
@@ -615,7 +615,7 @@ try
     end
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
-function res = isMAT(fileMAT)
+function [res] = isMAT(fileMAT)
 try
     % Variables
     res = false;
