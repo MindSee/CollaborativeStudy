@@ -1,4 +1,7 @@
-addpath(genpath(fullfile(BTB.PrivateDir, 'studies', '2015-MindSee-Collaborative')));
+function convertEEG
+disp('Converting EEG signals...')
+
+global BTB
 
 convertBase;
 
@@ -9,8 +12,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
     for i=1:12; % Select one of the twelve files recorded for each person
         
         % EEG and corresponding ET file
-        file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);
-        disp(file)
+        file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);        
         
         % load file header
         hdr= file_readBVheader(file);

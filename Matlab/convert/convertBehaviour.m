@@ -1,4 +1,7 @@
-addpath(genpath(fullfile(BTB.PrivateDir, 'studies', '2015-MindSee-Collaborative')));
+function convertBehaviour
+disp('Converting behaviour...')
+
+global BTB
 
 convertBase;
 
@@ -10,9 +13,8 @@ for tp=1:numel(subdir_list) % Select one of the test persons
 
         % EEG and corresponding ET file
         file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);
-        disp(file)
-        % Load eye tracking data
         
+        % Load eye tracking data        
         [ET_mrk] = readETMarkers(file);
 
         %% Behavioural data        

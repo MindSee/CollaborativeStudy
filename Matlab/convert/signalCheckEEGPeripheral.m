@@ -1,5 +1,8 @@
 %% Signal check
 
+% Put the following line in your startup file
+% addpath(genpath(fullfile(BTB.PrivateDir)));
+
 tp=1; % Select one of the test persons
 i=1; % Select one of the twelve files recorded for each person
 

@@ -1,24 +1,9 @@
-addpath(genpath(fullfile(BTB.PrivateDir, 'studies', '2015-MindSee-Collaborative')));
+function convertEYES
+disp('Converting eye tracking signals...')
 
-subdir_list={%'VPpaa_15_03_04'    
-    'VPpab_15_03_06'    
-    %'VPpac_15_03_09'
-    'VPpad_15_03_10'
-    'VPpae_15_03_11'
-    'VPpaf_15_03_11'
-    'VPpag_15_03_12'
-    'VPpah_15_03_12'
-    'VPpai_15_03_13'
-    'VPpaj_15_03_16'     
-    'VPpak_15_03_16'
-    'VPpal_15_03_17'    
-    };
+global BTB
 
-% TEST WITH THREE SUBJECTS
-subdir_list=subdir_list(1:3,:);
-
-tags={'hf_cr' 'hf_sq' 'lf_cr' 'lf_sq' 'hf_do' 'hf_st'
-    'lf_do' 'lf_st' 'hf_es' 'hf_tr' 'lf_es' 'lf_tr'};
+convertBase;
 
 for tp=1:numel(subdir_list) % Select one of the test persons
     
@@ -27,8 +12,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
     for i=1:12; % Select one of the twelve files recorded for each person
         
         % EEG and corresponding ET file
-        file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);
-        disp(file)
+        file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);        
         
         % load file header
         hdr= file_readBVheader(file);

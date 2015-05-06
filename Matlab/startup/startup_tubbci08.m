@@ -14,7 +14,7 @@ BBCI_PRIVATE_DIR = fullfile('E:', 'git', 'CollaborativeStudy');
 cd(BBCI_DIR);
 startup_bbci_toolbox('DataDir', DATA_DIR, ...
     'PrivateDir', BBCI_PRIVATE_DIR);
-
+cd(BBCI_PRIVATE_DIR);
 addpath(genpath(fullfile(BTB.PrivateDir)));
 format compact
 format longg
