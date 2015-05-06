@@ -86,6 +86,8 @@ ggplot(dat, aes(Trial, Delta)) +
 
 ### Answer time: #####################################################
 
+ggplot(dat, aes(Condition, Time)) + geom_boxplot()
+
 ggplot(dat, aes(abs(Delta), Time)) + geom_point()
 ggplot(dat, aes(Trial, Time)) + geom_point()
 
