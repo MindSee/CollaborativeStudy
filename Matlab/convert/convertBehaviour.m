@@ -14,8 +14,36 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         % EEG and corresponding ET file
         file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);
         
-        % Load eye tracking data        
+        % Load eeg marker files
+        mrk=file_readBVmarkers(file);
+        
+        % Load eye tracking data
         [ET_mrk] = readETMarkers(file);
+        
+        % Select stimulus markers only and delete stop markers
+        mrk=mrk_selectClasses(mrk,'S*');
+        mrk=mrk_selectClasses(mrk,'not','S255');
+        
+        % Warning if ET and EEG marker numbers do not match
+        try MarkerMismatch = not(mrk.event.desc'==ET_mrk.number);
+        catch, MarkerMismatch = 1; % Unequal number of markers
+        end
+        
+        if MarkerMismatch
+            error(['EEG and ET markers do not match for ' file '. Skipped this file.'])            
+        end
+        
+        
+        % Translate EEG markers (numbers only) into meaningful names
+        mrk=mrk_matchClasses(mrk, ET_mrk);
+        
+        
+        %% Trial time
+        start = mrk_selectClasses(mrk, {'Start'});
+        stop = mrk_selectClasses(mrk, {'Stop'});
+        
+        time = stop.time - start.time;
+        
 
         %% Behavioural data        
         
@@ -42,7 +70,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             end
         end
         
-        behaviour=struct('Answers',Answers ,'NumberOfTargets',NumberOfTargets);
+        behaviour=struct('Answers',Answers ,'NumberOfTargets',NumberOfTargets, 'Time', time);
         
         %% save in matlab format        
         matfilename = fullfile(BTB.MatDir,file);
