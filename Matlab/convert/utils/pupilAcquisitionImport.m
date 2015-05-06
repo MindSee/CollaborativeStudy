@@ -36,7 +36,7 @@ try
             if ~(exist('RAW', 'var')) && ~(exist('TABLE', 'var'))
                 disp('Can''t find the RAW TABLE variables.')
             end
-        elseif isXLSX(input) || isXLS(input)
+        elseif (isXLSX(input) || isXLS(input))
             
             [TABLE, TXT, RAW] = xlsread(input); clear TXT
             [TABLE, TXT, RAW] = xlsread(input); clear TXT
@@ -50,9 +50,40 @@ try
             else
                 disp('Can''t read the file, check the file extension.')
             end
+        elseif isTXT(fileTXT)
+            fid = fopen(input);
+            iRow = 0;
+            textLine = fgetl(fid);
+            while ischar(textLine)
+                iRow = iRow + 1;
+                line = regexp(textLine, '\t', 'split');
+                if iscell(line)
+                    nCell = length(line);
+                    for iCell = 1 : nCell
+                        RAW{iRow, iCell} = line{1, iCell};
+                    end
+                else
+                    RAW{iRow, 1} = line;
+                end
+                textLine = fgetl(fid);
+            end
+            fclose(fid);
         end
     end
     
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
+
+function res = isTXT(fileTXT)
+try
+    % Variables
+    res = false;
+    if (exist(fileTXT) == 2)
+        % Get file extension
+        fileExtension = fileTXT((end - 2) : end);
+        if strcmp(fileExtension, 'txt') || strcmp(fileExtension, 'TXT')
+            res = true;
+        end
+    end
 catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function res = isXLS(fileXLS)
