@@ -1,4 +1,4 @@
-function [] = startup_filippo()
+% function [] = startup_filippo()
 % startup_filippo
 
 % WorkSpace
@@ -33,3 +33,8 @@ format longg
 
 cd(pathMindSee)
 clc
+
+tic
+file = which('MindSeeCollaborativeStudy2015_hf_cr_VPpad Events.txt')
+[eyes] = convertEventTxt2Mat(file, true);
+toc
