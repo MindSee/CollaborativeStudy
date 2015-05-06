@@ -1,4 +1,17 @@
-function convertEEG
+function [] = convertEEG()
+% Convert the EEG signals.
+% 
+%   Syntax:
+%          [] = convertEEG()
+%
+%   Parameters:
+%           --
+%
+%   Return values:
+%           --
+%
+%	Author: Markus W.  05/05/2015
+
 disp('Converting EEG signals...')
 
 global BTB
@@ -8,11 +21,11 @@ convertBase;
 for tp=1:numel(subdir_list) % Select one of the test persons
     
     tpcode=regexp(subdir_list{tp},'_','split');tpcode=tpcode{1};
-    BTB.Tp.Dir=fullfile(BTB.RawDir,subdir_list{tp});    
+    BTB.Tp.Dir=fullfile(BTB.RawDir,subdir_list{tp});
     for i=1:12; % Select one of the twelve files recorded for each person
         
         % EEG and corresponding ET file
-        file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);        
+        file=fullfile(subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode]);
         
         % Load file header
         hdr= file_readBVheader(file);
@@ -31,13 +44,13 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         Fs = 250; % new sampling rate
         [cnt, mrk] = file_readBV(file, 'Fs',Fs, 'Filt',filt);
         
-        % Re-reference data to the mean of the scalp channels 
+        % Re-reference data to the mean of the scalp channels
         % (To remove influence of peripheral channels due to hardware common average referencing)
         iScalp = util_chanind(cnt.clab,clabScalp);
         cnt.x = bsxfun(@minus,cnt.x, mean(cnt.x(:,iScalp),2) );
         
         % Remove non-scalp channels
-        cnt=proc_selectChannels(cnt,util_chanind(cnt, clabScalp));                        
+        cnt=proc_selectChannels(cnt,util_chanind(cnt, clabScalp));
         
         % Load eye tracking data
         [ET_mrk] = readETMarkers(file);
@@ -56,7 +69,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         end
         
         if MarkerMismatch
-            error(['EEG and ET markers do not match for ' file '. Skipped this file.'])            
+            error(['EEG and ET markers do not match for ' file '. Skipped this file.'])
         end
         
         % Translate EEG markers (numbers only) into meaningful names
@@ -74,14 +87,13 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             'PO1,O1,_,O2,PO2']);
         mnt = mnt_setGrid(mnt, grd);
         
-        %% save in matlab format        
+        %% save in matlab format
         matfilename = fullfile(BTB.MatDir,file);
         eegfilename = regexprep(matfilename, 'MindSeeCollaborativeStudy2015', 'EEG');
         fprintf('Saving %s\n', eegfilename)
         warning('off', 'MATLAB:save:versionWithAppend')
         file_saveMatlab(eegfilename, cnt, mrk, mnt);
         
-                                 
         %% Clear all unnecessary variables
         clearvars -except BTB subdir_list tp tpcode tags i
         
