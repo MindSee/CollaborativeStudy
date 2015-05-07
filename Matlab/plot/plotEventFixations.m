@@ -1,4 +1,4 @@
-function [] = plotEventFixations(input, threesholdFixations)
+function [] = plotEventFixations(input, threesholdFixations, diameterTarget)
 % --
 %
 %   Syntax:
@@ -14,9 +14,6 @@ function [] = plotEventFixations(input, threesholdFixations)
 
 
 try
-    close all
-    clc
-    
     % Nargin
     if nargin < 1
         [eye] = convertEventTxt2Mat();
@@ -28,8 +25,13 @@ try
             [eye] = convertEventTxt2Mat(input);
         end
     end
-    if nargin < 2
-        threesholdFixations = 150000;  % threesholdFixations = 0;
+    if nargin < 3
+        % Diameter of the Target in pixels
+        diameterTarget = 60;
+        if nargin < 2
+            % Threeshold of Fixations in micro-second
+            threesholdFixations = 150000;
+        end
     end
     
     nFixations = length(eye.fixations.trial);
@@ -90,13 +92,12 @@ try
             title(['Fixations of ', titleFocus, ' with ', titleSimbol, ' stimuli [', target, ']']);
             
             hold on
-            diameterTarget = 60;
             h = 1050; w = 1680;
             axis([0 w 0 h])
             
             % Plot Stimulus
             imageStimulus = imread(which([simbol, '_', focus, '_', target, '.tif']));
-            image([0 w], [0 h], imageStimulus);
+            image([0 w], [h 0], imageStimulus);
             
             % Plot Fixations
             load(which([simbol, '_', focus, '_', target, '.mat']));
@@ -110,10 +111,8 @@ try
             % Plot Target
             nTarget = size(centerTarget, 1);
             for iTarget = 1 : nTarget
-                % plot(centerTarget(iTarget, 1), centerTarget(iTarget, 2), '*r', 'MarkerSize', 8);
-                plotTarget(centerTarget(iTarget, :), 30, 'k');
+                plotTarget(centerTarget(iTarget, :), diameterTarget/2, 'k');
             end
-            
             hold off
         end
     end
@@ -160,8 +159,6 @@ try
                 (yCenterFixation >= (yCenterTarget - (diameterTarget/2)))
             checkOnTarget = true;
             colourFixations = 'g';
-        else
-            % disp([num2str(fix(xCenterFixation)), ' ', num2str(fix(yCenterFixation))]);
         end
     end
     
