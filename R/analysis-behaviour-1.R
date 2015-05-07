@@ -3,7 +3,7 @@ library("ggplot2")
 library("reshape")
 library("plyr")
 
-source("functions-import.R")
+source("functions-behaviour.R")
 
 
 ### Read behavioural data: ###########################################

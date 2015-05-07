@@ -25,27 +25,3 @@ readBehaviour <- function(file) {
 }
 
 
-readEye <- function(file) {
-  mat <- readMat(file)
-  mat <- mat$eye[, , 1]$fixations[, , 1]
-  
-  loc <- mat$location
-  loc <- do.call(cbind, loc)
-  colnames(loc) <- c("x", "y")
-  
-  mat$location <- NULL
-  mat$plane <- NULL
-  mat$dispersion <- NULL
-  mat$pupil <- NULL
-  
-  mat <- as.data.frame(mat)
-  mat <- cbind(mat, loc)
-  
-  mat <- cbind(Id = sub(".+EyeEvent_(.+)_(.+)_(.+).mat", "\\3", file),
-               Condition = sub(".+EyeEvent_(.+)_(.+)_(.+).mat", "\\1", file),
-               Symbol = sub(".+EyeEvent_(.+)_(.+)_(.+).mat", "\\2", file),
-               mat)
-  
-  mat
-}
-

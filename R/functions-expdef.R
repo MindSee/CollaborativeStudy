@@ -1,8 +1,11 @@
 
+stopifnot(require(ggplot2))
+stopifnot(require(reshape))
+
 
 getExpDef <- function() {
   
-  trialdef <- function(block, part, sybmol, condition, trial, target) {
+  trialdef <- function(block, part, symbol, condition, trial, target) {
     data.frame(Block = block, Part = part,
                Condition = condition, Symbol = symbol,
                Trial = trial, Target = target, stringsAsFactors = FALSE)
@@ -88,8 +91,15 @@ readExpSetup <- function(file) {
                                           rotation = "numeric", size = "numeric",
                                           shape = "character", pattern = "character"))
   
-  #coords$IsTarget <- str_detect(coords$pattern, attrs["target"])
-  coords$IsTarget <- coords$pattern == sprintf("%s_00", attrs["target"])
+  if ( grepl("P", attrs["target"]) ) {
+    coords$IsTarget <- 
+      coords$pattern == sprintf("%s_00", attrs["target"]) | 
+      coords$pattern == sprintf("%s_01", attrs["target"]) 
+  } else {
+    coords$IsTarget <- 
+      coords$shape == sprintf("%s_00", attrs["target"]) | 
+      coords$shape == sprintf("%s_01", attrs["target"])     
+  }
   
   free(doc)
   
@@ -109,16 +119,24 @@ loadExpSetup <- function(SETUPDIR) {
   files <- unlist(files, recursive = FALSE)
   setups <- lapply(files, readExpSetup)
   
+  def <- getExpDef()
+  
   sd <- data.frame(Cond = as.character(sapply(setups, function(x) x$Condition[1])),
                    Symb = as.character(sapply(setups, function(x) x$Symbol[1])),
                    Tars = sapply(setups, function(x) x$Targets[1]),
                    stringsAsFactors = FALSE)
   
+  ssd <- apply(sd, 1, paste, collapse = "-")
+  sdef <- apply(def, 1, function(x) paste(x["Condition"], x["Symbol"], x["Target"],  sep= "-"))
   
-  def <- get_ExpDef()
+  setups <- setups[match(sdef, ssd)]
   
-  head(def)
-  head(sd)
-  
-  
+  list(Trials = def, Stimuli = setups)
 }
+
+
+plotSetup <- function(x) {
+  ggplot(x, aes(xPos, yPos, colour = IsTarget)) + geom_point() + 
+    xlim(c(0, 1680)) + ylim(c(0, 1050))
+}
+
