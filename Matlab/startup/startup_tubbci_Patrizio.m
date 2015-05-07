@@ -104,17 +104,16 @@ try
         axis([0 w 0 h])
         
         % Plot Stimulus
-        imageStimulus = imread(which([simbol, '_', focus, '_', target, '.tif']));
+        imageFileName = which([simbol, '_', focus, '_', target, '.tif'])
+        imageStimulus = imread(imageFileName);
         
         image([0 w], [0 h], imageStimulus);
         
         % Plot Fixations
         nTarget = str2double(target);
         for iTarget = 1 : nTarget
-            title(['Find the ', num2str(iTarget), '° target of ', titleFocus, ' with ', titleSimbol, ' stimuli [', target, ']']);
-            [x, y] = ginput(1);
-            centerTarget(iTarget, 1) = x;
-            centerTarget(iTarget, 2) = y;
+            title(['Find the ', num2str(iTarget), '? target of ', titleFocus, ' with ', titleSimbol, ' stimuli [', target, ']']);
+            [centerTarget(iTarget, 1), centerTarget(iTarget, 2)] = ginput(1);
         end
         
         % Save the center of the target
