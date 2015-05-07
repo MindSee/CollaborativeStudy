@@ -39,4 +39,5 @@ clc
 tic
 file = which('MindSeeCollaborativeStudy2015_hf_cr_VPpad Events.txt');
 [eye, eyes] = convertEventTxt2Mat(file, true);
+plotEventFixations(eye)
 toc
