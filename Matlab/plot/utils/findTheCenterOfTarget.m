@@ -65,4 +65,4 @@ try
         disp(['The coordinates are saved into: ', imageFilePath, simbol, '_', focus, '_', target, '.mat .']); else disp('Error.');
     end
     
-catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
