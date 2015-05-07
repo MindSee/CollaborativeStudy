@@ -70,7 +70,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         mnt = mnt_setElectrodePositions(cnt.clab);
         
         % arrangement for grid plots
-        grd = sprintf(['scale,scale,EMGa,EMGb,EDA,legend']);        
+        grd = sprintf(['scale,EMGa,EMGb,EDA,legend']);        
         mnt = mnt_setGrid(mnt, grd);
         
         %% save in matlab format        
