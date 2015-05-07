@@ -11,6 +11,8 @@ pathBBCI = fileparts(which('startup_bbci_toolbox.m'));
 sep = strfind(pathBBCI, filesep);
 pathMindSee = pathBBCI(1 : sep(end));
 
+addpath(genpath(pathMindSee));
+
 % Globa Variables
 global BTB
 
@@ -35,6 +37,6 @@ cd(pathMindSee)
 clc
 
 tic
-file = which('MindSeeCollaborativeStudy2015_hf_cr_VPpad Events.txt')
+file = which('MindSeeCollaborativeStudy2015_hf_cr_VPpad Events.txt');
 [eye, eyes] = convertEventTxt2Mat(file, true);
 toc
