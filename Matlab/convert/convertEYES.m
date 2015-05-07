@@ -39,6 +39,9 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         % save in matlab format
         matfilename = fullfile(BTB.MatDir, subdir_list{tp},['EyeEvent_' tags{i} '_' tpcode]);
         
+        [pathstr,name,ext] = fileparts(matfilename);
+        if not(isdir(pathstr)), mkdir(pathstr), end
+        
         fprintf('Saving %s\n', matfilename)
         save(matfilename,'eye');
         

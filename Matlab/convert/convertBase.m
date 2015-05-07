@@ -27,5 +27,5 @@ subdir_list={%'VPpaa_15_03_04'
 
 % Experimental conditions 
 % (hf= high focus, lf=low focus; cr=cross, sq=square, st=star, es=eye shaped, do =dotted, tr=triangle)
-tags={'hf_sq' 'lf_do' 'hf_st' 'lf_tr' 'hf_es' 'lf_cr'
+tags={'hf_sq' 'lf_do' 'hf_st' 'lf_tr' 'hf_es' 'lf_cr', ...
     'hf_do' 'lf_es' 'hf_tr' 'lf_st' 'hf_cr' 'lf_sq'};
