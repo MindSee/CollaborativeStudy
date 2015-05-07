@@ -1,26 +1,7 @@
 
 library("stringr")
 
-source("functions-import.R")
-
-
-
-### Read experiment setup definitions: ###############################
-
-source("definition-experiment.R")
-
-SETUPDIR <- "~/Workspace/MindSee/expsetup/stimuli"
-
-expsetup <- import
-
-
-
-conditions <- list.files(SETUPDIR, full = TRUE)
-files <- lapply(conditions, list.files, pattern = ".*xml", full = TRUE)
-files <- unlist(files, recursive = FALSE)
-
-setups <- lapply(files, readExpSetup)
-
+source("functions-eye.R")
 
 
 ### Read fixation data: ##############################################
@@ -32,32 +13,37 @@ files <- lapply(participants, list.files, pattern = "EyeEvent_*", full = TRUE)
 
 eyes <- lapply(files, lapply, readEye)
 
-str(eyes[[1]][[1]], 1)
 
-
-### ... ##############################################################
-
-plot_setup <- function(x) {
-  plot(x$xPos, x$yPos, pch = 19, col = ifelse(x$IsTarget, "red", "lightgray"),
-       xlim = c(0, 1680), ylim = c(0, 1050))
-}
-
-
-get_setup <- function(x, setups) {
-  s_cond <- as.character(sapply(setups, function(y) y$Condition[1]))
-  s_symb <- as.character(sapply(setups, function(y) y$Symbol[1]))
-  
-  w <- which(x$Condition[1] == s_cond & x$Symbol[1] == s_symb)
-}
-
-
-plot_setup(setups[[1]][[3]])
-
-lapply(setups, lapply, function(x) sum(x$IsTarget))
+plotFixations(subset(eyes[[1]][[1]], trial == 1))
+plotFixations(subset(eyes[[1]][[1]], trial == 2))
+plotFixations(subset(eyes[[1]][[1]], trial == 3))
+plotFixations(subset(eyes[[1]][[1]], trial == 4))
 
 
 
-setups[[1]][[1]]
+### Summary statistics per condition: ################################
 
-setups[[1]][[1]]
+# Number of fixations
+# Mean duration of fixation
+# Number of fixations > 150
 
+stats <- lapply(eyes, lapply, fixationStats)
+stats <- do.call(rbind, unlist(stats, recursive = FALSE))
+
+ggplot(stats, aes(Condition, NumFixations)) + geom_boxplot()
+ggplot(stats, aes(Condition, MeanDuration)) + geom_boxplot()
+ggplot(stats, aes(Condition, NumFixations150)) + geom_boxplot()
+ggplot(stats, aes(Condition, MeanPupil)) + geom_boxplot()
+
+
+
+### Summary statistics per condition and participant: ################
+
+ggplot(stats, aes(Condition, NumFixations)) + geom_boxplot() + facet_grid(. ~ Id)
+ggplot(stats, aes(Condition, MeanDuration)) + geom_boxplot() + facet_grid(. ~ Id)
+ggplot(stats, aes(Condition, NumFixations150)) + geom_boxplot() + facet_grid(. ~ Id)
+ggplot(stats, aes(Condition, MeanPupil)) + geom_boxplot() + facet_grid(. ~ Id)
+
+
+t <- lapply(eyes[[4]], function(x) x$pupil)
+ggplot(melt(t), aes(L1, value, group = L1)) + geom_boxplot()
