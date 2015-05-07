@@ -16,6 +16,7 @@ function [] = plotEventFixations(input, threesholdFixations)
 try
     close all
     clc
+    
     % Nargin
     if nargin < 1
         [eye] = convertEventTxt2Mat();
@@ -56,14 +57,14 @@ try
         end
         
         iOldTrial = iTrial;
-        
     end
     
     for iTrial = 1 : nTrials
         
         if (strfind(eye.events.description{iTrial, 1}, '_Start_'))
             
-            figure(iTrial);
+            fig = figure(iTrial);
+            set(fig, 'position', screenSize, 'backgroundcolor', white);
             
             % Trial Properties
             separator = strfind(eye.events.description{4, 1}, '_');
@@ -100,7 +101,7 @@ try
             title(['Fixations of ', titleFocus, ' with ', titleSimbol, ' stimuli [', target, ']']);
             
             hold on
-            
+            diameterTarget = 60;
             h = 1050; w = 1680;
             axis([0 w 0 h])
             
@@ -109,12 +110,13 @@ try
             image([0 w], [0 h], imageStimulus);
             
             % Plot Fixations
+            load(which([simbol, '_', focus, '_', target, '.mat']));
             nTrialFixations = length(fixations(iTrial).location.x);
             for iTrialFixations = 1 : nTrialFixations
-                colourFixations = 'k';
-                plotCircle([fixations(iTrial).location.x(iTrialFixations), fixations(iTrial).location.y(iTrialFixations)], (fixations(iTrial).duration(iTrialFixations)/100000), 1000  , );
+                centerFixation = [fixations(iTrial).location.x(iTrialFixations), fixations(iTrial).location.y(iTrialFixations)];
+                [checkOnTarget, colourFixations] = checkFixationOnTarget(centerFixation, centerTarget, diameterTarget);
+                plotCircle(centerFixation, (fixations(iTrial).duration(iTrialFixations)/100000), 1000, colourFixations);
             end
-            
             hold off
         end
     end
@@ -183,10 +185,15 @@ try
     
     for iTarget = 1 : nTarget
         
-        xCenterTarget = centerTarget(1, 1);
-        yCenterTarget = centerTarget(1, 2);
+        xCenterTarget = centerTarget(iTarget, 1);
+        yCenterTarget = centerTarget(iTarget, 2);
         
-        if (xCenterFixation <= ())
+        if (xCenterFixation <= (xCenterTarget + (diameterTarget/2))) && ...
+                (xCenterFixation >= (xCenterTarget - (diameterTarget/2))) && ...
+                (yCenterFixation <= (yCenterTarget + (diameterTarget/2))) && ...
+                (yCenterFixation >= (yCenterTarget - (diameterTarget/2)))
+            checkOnTarget = true;
+            colourFixations = 'r';
         end
     end
     
