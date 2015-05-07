@@ -45,5 +45,11 @@ ggplot(stats, aes(Condition, NumFixations150)) + geom_boxplot() + facet_grid(. ~
 ggplot(stats, aes(Condition, MeanPupil)) + geom_boxplot() + facet_grid(. ~ Id)
 
 
-t <- lapply(eyes[[4]], function(x) x$pupil)
-ggplot(melt(t), aes(L1, value, group = L1)) + geom_boxplot()
+
+### Focus on one shape in the two conditions: ########################
+
+ggplot(stats, aes(Condition, NumFixations)) + geom_boxplot() + facet_grid(. ~ Symbol)
+ggplot(stats, aes(Condition, MeanDuration)) + geom_boxplot() + facet_grid(. ~ Symbol)
+ggplot(stats, aes(Condition, NumFixations150)) + geom_boxplot() + facet_grid(. ~ Symbol)
+ggplot(stats, aes(Condition, MeanPupil)) + geom_boxplot() + facet_grid(. ~ Symbol)
+

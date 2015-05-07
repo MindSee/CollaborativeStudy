@@ -1,6 +1,8 @@
 
-stopifnot(require("classInt"))
 stopifnot(require("R.matlab"))
+stopifnot(require("ggplot2"))
+stopifnot(require("reshape"))
+stopifnot(require("classInt"))
 
 
 readEye <- function(file) {
