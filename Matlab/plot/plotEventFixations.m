@@ -192,6 +192,7 @@ try
     h = fill(x, y, color);
     axis square;
     plot(x, y, color);
+    text(x, y, ['x: ', num2str(x), ', y: ', num2str(y)])
     
 catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
 
