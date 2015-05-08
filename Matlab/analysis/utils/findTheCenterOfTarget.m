@@ -1,13 +1,14 @@
 function [] = findTheCenterOfTarget(simbol, focus, target)
-% --
+% Find the center of the target.
 %
 %   Syntax:
 %          [] = findTheCenterOfTarget(simbol, focus, target)
 %
 %   Parameters:
-%           simbol
-%           focus
-%           target
+%           simbol                  Simbol of the target (cr, es, tr, do,
+%                                   st, sq).
+%           focus                   Focus of the target (lf, hf).
+%           target                  Number of the target.
 %
 %   Return values:
 %           --

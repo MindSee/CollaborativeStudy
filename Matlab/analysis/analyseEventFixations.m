@@ -1,5 +1,5 @@
 function [eyeUpdate, eyeWithoutThreesholdedFixations] = analyseEventFixations(input, threesholdFixations, diameterTarget)
-% --
+% Update and plot the Fixations.
 %
 %   Syntax:
 %          [eyeUpdate, eyeWithoutThreesholdedFixations] = analyseEventFixations(input)
