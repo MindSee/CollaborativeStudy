@@ -54,6 +54,9 @@ for i_band=1:numel(bands_all)
                 %art_ival=[0 2000];
                 %mkk= reject_varEventsAndChannels(cnt, mkk, art_ival);%, 'verbose', 1);
                 
+                % Channel with large power in grand average spectrum removed
+                %cnt=proc_selectChannels(cnt, 'not', 'CP1');
+                
                 % Segmentation into epochs
                 epo=proc_segmentation(cnt, mkk, [0  2000]);
                 
