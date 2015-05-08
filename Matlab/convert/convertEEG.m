@@ -17,7 +17,7 @@ disp('Converting EEG signals...')
 
 global BTB
 
-convertBase;
+convertBaseEEG;
 
 for tp=1:numel(subdir_list) % Select one of the test persons
     

@@ -2,7 +2,7 @@ disp('EEG classification using common spatial patterns...')
 
 global BTB
 
-convertBase;
+convertBaseEEG;
 
 bands_all={[1 3] [4 7] [8 12] [13 30] [31 50]};
 bands_names={'Delta' 'Theta' 'Alpha' 'Beta' 'Gamma'};
