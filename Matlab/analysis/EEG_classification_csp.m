@@ -98,7 +98,7 @@ for i_band=1:numel(bands_all)
         % [fvTr, memo]= xvalutil_proc(fvTr, opt.Proc.train);
         
         loss= crossvalidation(fv, {@train_RLDAshrink, 'Gamma',0}, ...
-            'SampleFcn',  {@sample_KFold, [1 5]},...
+            'SampleFcn',  {@sample_KFold, [10 10]},...
             'Proc', proc, 'LossFcn', @loss_rocArea);
         %'SampleFcn', {@sample_chronKFold, 8}, ...
         
@@ -110,13 +110,15 @@ for i_band=1:numel(bands_all)
     
 end
 
-% Plot classification results
+%% Plot classification results
+close all
 fig_set(1,'gridsize',[2 3]);
-boxplot(AUC_all, 'labels',bands_names, 'orientation','vertical');
-title('EEG classification using CSP');
-ylabel('AUC ROC','Color',[0 0 0],'FontSize',8); % Area under roc curve
-set(gca,'YLim',[0.48 1],'TickLength',[0.05 0.05]);
+boxplot(AUC_all, 'labels', bands_names, 'orientation','vertical');
+%ax=title('EEG classification with CSP','FontWeight','bold');
+ylabel('[AUC]','Color',[0 0 0]);%,'FontSize',8); % Area under roc curve
+set(gca,'YLim',[0.48 1],'TickLength',[0.03 0.03]);
 hold on
+
 % Statistical assessment
 m=0.5;alpha=0.05 / numel(bands_all); % Correction for multiple comparisons
 tail='right';dim=1;
@@ -125,5 +127,5 @@ for i_band=1:numel(bands_all)
     if h, plot(i_band,0.5,'*k'); end
 end
 
-opt_fig= struct('folder', fullfile(BTB.FigDir), 'format', 'eps');
-util_printFigure(['EEG-classification-CSP'], [1 1]*4, opt_fig);
+opt_fig= struct('folder', fullfile(BTB.FigDir));
+util_printFigure(['EEG-classification-CSP'], [1 1]*7, opt_fig);
