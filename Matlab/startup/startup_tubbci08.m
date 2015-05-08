@@ -12,7 +12,7 @@ BBCI_DIR= fullfile('E:', 'git', 'bbci_public');
 BBCI_PRIVATE_DIR = fullfile('E:', 'git', 'CollaborativeStudy');
 
 % Folder for figures 
-BBCI_FIG_DIR = fullfile('E:', 'git', 'figures', 'CollaborativeStudy');
+BBCI_FIG_DIR = fullfile('E:', 'figures', 'CollaborativeStudy');
 
 cd(BBCI_DIR);
 startup_bbci_toolbox('DataDir', DATA_DIR, ...
