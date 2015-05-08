@@ -11,10 +11,14 @@ BBCI_DIR= fullfile('E:', 'git', 'bbci_public');
 % Folder with convert and analysis scripts
 BBCI_PRIVATE_DIR = fullfile('E:', 'git', 'CollaborativeStudy');
 
+% Folder for figures 
+BBCI_FIG_DIR = fullfile('E:', 'git', 'figures', 'CollaborativeStudy');
+
 cd(BBCI_DIR);
 startup_bbci_toolbox('DataDir', DATA_DIR, ...
-    'PrivateDir', BBCI_PRIVATE_DIR);
+    'PrivateDir', BBCI_PRIVATE_DIR,'FigDir', BBCI_FIG_DIR);
 cd(BBCI_PRIVATE_DIR);
+
 addpath(genpath(fullfile(BTB.PrivateDir)));
 format compact
 format longg
