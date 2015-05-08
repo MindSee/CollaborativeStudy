@@ -114,5 +114,6 @@ table(dat$GoodTrial, dat$Symbol)
 
 ### Trials to be removed: ############################################
 
-with(subset(dat, !GoodTrial), sprintf("%s_%s_%s", Condition, Symbol, Id))
+with(subset(dat, !GoodTrial), 
+     data.frame(Block = sprintf("%s_%s_%s", Condition, Symbol, Id), Trial = Trial))
 
