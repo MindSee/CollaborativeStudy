@@ -2,7 +2,7 @@ disp('Spectral analysis of EEG data...')
 
 global BTB
 
-convertBase;
+convertBaseEEG;
 
 spec={};
 spec_r={};
@@ -16,12 +16,12 @@ for tp=1:numel(subdir_list) % Select one of the test persons
     % Load the EEG files of the two conditions "high focus" and "low focus"    
     epo_all=[];
     conditions={'hf' 'lf'};
-    for c=1:2        
+    for c=1:2
         % Get tags of the current condition
         idx=strfind(tags,conditions{c});
         idx= find(not(cellfun('isempty', idx)));
         tags_condition= tags(idx);
-                
+        
         % Load files of the current condition
         for t=1:numel(tags_condition)
             file= fullfile(BTB.MatDir, subdir_list{tp},['EEG_' tags_condition{t} '_' tpcode '.mat']);
@@ -38,7 +38,21 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             
             % Add markers every 2000 ms only during stimulus presentation
             mkk= mrk_evenlyInBlocksNew(blk, 2000);
+            art_ival=[0 2000];
+            [mkk rClab]= reject_varEventsAndChannels(cnt, mkk, art_ival);%, 'verbose', 1);
+            
+            fprintf('Channel rejected: %s\n', rClab{:});
+            if ~isempty(rClab)
+                rClab_trials{c,t}=rClab{:};
+            else
+                rClab_trials{c,t}='';
+            end
+            %cnt=proc_selectChannels(cnt,'not',rClab);
             epo=proc_segmentation(cnt, mkk, [0  2000]);
+            crit_maxmin= 150;
+            epo= proc_rejectArtifactsMaxMin(epo, crit_maxmin);
+            
+            
             if (t==1 && c==1)
                 epo_all=epo;
             else
@@ -46,6 +60,8 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             end
         end
     end
+    
+    epo_all=proc_selectChannels(epo_all,'not',unique(rClab_trials))
     
     spec{tp}= proc_spectrum(epo_all, [2 60]);
     spec_r{tp}= proc_rSquareSigned(spec{tp},'Stats',1);    
@@ -69,20 +85,39 @@ for tp=1:numel(subdir_list)
 end
 %}
 
-fig_set(numel(subdir_list)+1);
-H= grid_plot(spec_ga, mnt, opt_grid_spec,'XUnit', spec_ga.xUnit, 'YUnit', spec_ga.yUnit);
-grid_addBars(spec_r_ga, 'HScale',H.scale);
+% fig_set(numel(subdir_list)+1);
+% H= grid_plot(spec_ga, mnt, opt_grid_spec,'XUnit', spec_ga.xUnit, 'YUnit', spec_ga.yUnit);
+% grid_addBars(spec_r_ga, 'HScale',H.scale);
 
+spec_ga_forVisual=spec_ga;
+spec_ga_forVisual.x=spec_ga.x(1:35,:,:);
+spec_ga_forVisual.t=spec_ga.t(1:35)
 
-clab={'O1','Cz'}
-band_list= [7 11; 11 14; 20 24; 26 36];
+spec_r_ga_forVisual=spec_r_ga;
+spec_r_ga_forVisual.x=spec_r_ga.x(1:35,:,:);
+spec_r_ga_forVisual.t=spec_r_ga.t(1:35)
+
+clab={'O1','FC1'}
+band_list= [4 7; 8 12; 13 15; 18 22; 26 36];
 figure
-H= plot_scalpEvolutionPlusChannel(spec_ga, mnt, clab, band_list, ...
+H= plot_scalpEvolutionPlusChannel(spec_ga_forVisual, mnt, clab, band_list, ...
     defopt_scalp_power, ...
     'ColorOrder',colOrder, ...
     'ScalePos','horiz', ...
     'GlobalCLim',0,...
-    'XUnit', spec_ga.xUnit, 'YUnit', spec_ga.yUnit);
-grid_addBars(spec_r_ga);
+    'XUnit', spec_ga_forVisual.xUnit, 'YUnit', spec_ga_forVisual.yUnit);
+grid_addBars(spec_r_ga_forVisual);
 
+
+BTB.FigDir= '/Volumes/data/CollaborativeStudy/';
+opt_fig= struct('folder', fullfile(BTB.FigDir), 'format', 'png');
+print('-dbmp',[ opt_fig.folder 'GA_spectra.' opt_fig.format]);
+
+
+
+fig_set(4, 'Resize',[1 2/3]);
+plot_scalpEvolutionPlusChannel(spec_r_ga_forVisual, mnt, clab, band_list, defopt_scalp_r,...
+    'XUnit', spec_r_ga_forVisual.xUnit, 'YUnit', spec_r_ga_forVisual.yUnit);
+
+print('-dbmp',[ opt_fig.folder 'GA_r_spectra.' opt_fig.format]);
 
