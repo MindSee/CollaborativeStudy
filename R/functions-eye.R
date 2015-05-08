@@ -40,6 +40,9 @@ readEye <- function(file) {
   mat <- mat[mat$trial %in% trials, ]
   mat$trial <- as.integer(ordered(mat$trial))
   
+  mat$TimeNorm <- 
+    do.call(c, lapply(split(mat$start, mat$trial), function(x) (x - min(x)) / 1000))
+  
   mat
 }
 
