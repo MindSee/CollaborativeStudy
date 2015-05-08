@@ -1,15 +1,9 @@
-disp('Extracting EEG features...')
+disp('EEG classification using CSP...')
 
 global BTB
 
 convertBase;
 
-% Options
-colOrder= [245 159 0; 0 150 200]/255;
-opt_grid_spec= defopt_spec('xTickAxes','CPz', 'colorOrder',colOrder);
-
-spec={};
-spec_r={};
 loss_all={};
             
 for tp=1:numel(subdir_list) % Select one of the test persons
@@ -17,10 +11,10 @@ for tp=1:numel(subdir_list) % Select one of the test persons
     tpcode=regexp(subdir_list{tp},'_','split'); tpcode=tpcode{1};
     BTB.Tp.Dir=fullfile(BTB.MatDir,subdir_list{tp});
     
-    % Load the EEG files of the two conditions "high focus" and "low focus"
-    %fv={};
+    % Load the EEG files of the two conditions "high focus" and "low focus"    
     epo_all=[];
     conditions={'hf' 'lf'};
+    
     for c=1:2
         
         % Get tags of the current condition
@@ -28,9 +22,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         idx= find(not(cellfun('isempty', idx)));
         tags_condition= tags(idx);
         
-        % Load and segment files of the current condition considering only
-        % intervals during stimulus presentation
-        
+        % Load files of the current condition
         for t=1:numel(tags_condition)
             file= fullfile(BTB.MatDir, subdir_list{tp},['EEG_' tags_condition{t} '_' tpcode '.mat']);
             [cnt, mrk, mnt] = file_loadMatlab(file);
@@ -40,7 +32,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             cnt= proc_filt(cnt, filt_b, filt_a);
 
             % Extract features ..
-            blk=blk_segmentsFromMarkers(mrk, 'start_marker','Start','end_marker','Stop');
+            blk=blk_segmentsFromMarkersNew(mrk, 'start_marker','Start','end_marker','Stop');
             blk.className={conditions{c}};
             blk.y= ones(1, size(blk.ival,2));
             blk.fs=cnt.fs; % necessary for function mrk_evenlyInBlocks

@@ -42,10 +42,14 @@ end
 %offset_start= round(opt.offset_start/1000*blk.fs); % start offset in samples
 %offset_end= round(opt.offset_end/1000*blk.fs); % end offset in samples
 
+step = msec;
+offset_start= opt.offset_start; % start offset in msec
+offset_end= opt.offset_end; % end offset in msec
+
 nBlocks= size(blk.ival,2);
 for bb= 1:nBlocks,
   %new_pos= blk.ival(1,bb)+offset_start:step:blk.ival(2,bb)-offset_end;
-  new_time= blk.ival(1,bb):msec:blk.ival(2,bb);
+  new_time= blk.ival(1,bb):msec:blk.ival(2,bb)-offset_end;
   nMrk= length(new_time);
   mrk.time= cat(2, mrk.time, new_time);
   mrk.blkno= cat(2, mrk.blkno, bb*ones(1,length(new_time)));
