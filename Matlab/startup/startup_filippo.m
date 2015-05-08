@@ -39,6 +39,6 @@ tic
 close all; clc
 % % % file = which('MindSeeCollaborativeStudy2015_lf_cr_VPpab Events.txt');
 % % % disp('convertEventTxt2Mat'); [eye, eyes] = convertEventTxt2Mat(file, true);
-disp('plotEventFixations'); plotEventFixations(eye)
+disp('plotEventFixations'); [eyeUpdate] = analyseEventFixations(eye);
 
 toc
