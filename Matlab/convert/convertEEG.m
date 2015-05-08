@@ -50,13 +50,17 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         iScalp = util_chanind(cnt.clab,clabScalp);
         cnt.x = bsxfun(@minus,cnt.x, mean(cnt.x(:,iScalp),2) );
         
+        % highpass filter eeg-data
+        b= procutil_firlsFilter(0.5, cnt.fs);
+        cnt= proc_filtfilt(cnt, b);
+
         % Remove non-scalp channels
         cnt=proc_selectChannels(cnt,util_chanind(cnt, clabScalp));
         
         % Load eye tracking data
         [ET_mrk] = readETMarkers(file);
         
-        % Subtract corresponding bipolar electrodes of electrodes for facial EMG and electrodermal activity
+        % Remove bipolar electrodes of electrodes for facial EMG and electrodermal activity
         cnt = proc_selectChannels(cnt,'not',{'fEMG1' 'fEMG2' 'fEMG3' 'fEMG4' 'EDA1' 'EDA2'});
         
         
