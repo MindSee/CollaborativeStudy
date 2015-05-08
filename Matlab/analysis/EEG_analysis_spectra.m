@@ -51,10 +51,10 @@ for tp=1:numel(subdir_list) % Select one of the test persons
     spec_r{tp}= proc_rSquareSigned(spec{tp},'Stats',1);    
     spec_avg{tp}= proc_average(spec{tp},'Stats',1);                   
 end
-
+%%
 % Compute grand average
-spec_ga= proc_grandAverage(spec_avg,'Stats',1);
-spec_r_ga= proc_grandAverage(spec_r,'Stats',1);
+spec_ga= proc_grandAverage(spec_avg{2:end},'Stats',1);
+spec_r_ga= proc_grandAverage(spec_r{2:end},'Stats',1);
 
 
 % Plot
@@ -72,3 +72,17 @@ end
 fig_set(numel(subdir_list)+1);
 H= grid_plot(spec_ga, mnt, opt_grid_spec,'XUnit', spec_ga.xUnit, 'YUnit', spec_ga.yUnit);
 grid_addBars(spec_r_ga, 'HScale',H.scale);
+
+
+clab={'O1','Cz'}
+band_list= [7 11; 11 14; 20 24; 26 36];
+figure
+H= plot_scalpEvolutionPlusChannel(spec_ga, mnt, clab, band_list, ...
+    defopt_scalp_power, ...
+    'ColorOrder',colOrder, ...
+    'ScalePos','horiz', ...
+    'GlobalCLim',0,...
+    'XUnit', spec_ga.xUnit, 'YUnit', spec_ga.yUnit);
+grid_addBars(spec_r_ga);
+
+
