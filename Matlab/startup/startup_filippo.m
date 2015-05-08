@@ -1,11 +1,11 @@
 % % % % function [] = startup_filippo()
 % % % % startup_filippo
-% % % 
+
 % % % % WorkSpace
 % % % clear all
 % % % close all
 % % % clc
-% % % 
+
 % % % % Paths
 % % % pathBBCI = fileparts(which('startup_bbci_toolbox.m'));
 % % % sep = strfind(pathBBCI, filesep);
@@ -34,12 +34,11 @@
 % % % format longg
 % % % 
 % % % cd(pathMindSee)
-clc
 
 tic
-
-% % % file = which('MindSeeCollaborativeStudy2015_lf_cr_VPpad Events.txt');
-% % % [eye, eyes] = convertEventTxt2Mat(file, true);
-plotEventFixations(eye)
+close all; clc
+% % % file = which('MindSeeCollaborativeStudy2015_lf_cr_VPpab Events.txt');
+% % % disp('convertEventTxt2Mat'); [eye, eyes] = convertEventTxt2Mat(file, true);
+disp('plotEventFixations'); [eyeUpdate] = analyseEventFixations(eye);
 
 toc

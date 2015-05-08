@@ -1,6 +1,4 @@
 
-library("stringr")
-
 source("functions-eye.R")
 
 
