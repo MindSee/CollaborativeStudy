@@ -1,4 +1,4 @@
-function blk = blk_segmentsFromMarkers(mrk, varargin)
+function blk = blk_segmentsFromMarkersNew(mrk, varargin)
 %BLK_SEGMENTSFROMMARKERS - Define segments based on markers
 %
 % usage:

@@ -2,15 +2,10 @@ function [] = plotEventFixations(input, threesholdFixations, diameterTarget)
 % --
 %
 %   Syntax:
-%          [] = plotEventFixations(input)
-%          [] = plotEventFixations(input, threesholdFixations)
-%          [] = plotEventFixations(input, threesholdFixations, diameterTarget)
+%          [] = plotEvent(input)
 %
 %   Parameters:
 %           eye                         Eye monocular structure.
-%           threesholdFixations         Threeshold of Fixations in
-%                                       micro-second.
-%           diameterTarget              Diameter of the target in px.
 %
 %   Return values:
 %           --
@@ -103,7 +98,7 @@ try
             % Plot Stimulus
             imageStimulus = imread(which([simbol, '_', focus, '_', target, '.tif']));
             image([0 w], [h 0], imageStimulus);
-            
+                        
             % Plot Fixations
             load(which([simbol, '_', focus, '_', target, '.mat']));
             nTrialFixations = length(fixations(iTrial).location.x);
