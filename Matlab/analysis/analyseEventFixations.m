@@ -1,4 +1,4 @@
-function [eyeUpdate, eyeWithoutThreesholdedFixations] = analyseEventFixations(input, threesholdFixations, diameterTarget)
+function [eyeUpdate, eyeWithoutThreesholdedFixations] = analyseEventFixations(input, checkPlot, threesholdFixations, diameterTarget)
 % Update and plot the Fixations.
 %
 %   Syntax:
@@ -33,13 +33,16 @@ try
             [eye] = convertEventTxt2Mat(input);
         end
     end
-    if nargin < 3
+    
+    if nargin < 4
         % Diameter of the Target in pixels
         diameterTarget = 60;
-        if nargin < 2
+        if nargin < 3
             % Threeshold of Fixations in micro-second
-            threesholdFixations = 150000;
-            % threesholdFixations = 0;
+            threesholdFixations = 0;
+            if nargin < 2
+                checkPlot = false;
+            end
         end
     end
     
@@ -95,7 +98,9 @@ try
         
         if (strfind(eye.events.description{iTrial, 1}, '_Start_'))
             
-            figure(iTrial);
+            if checkPlot
+                figure(iTrial);
+            end
             
             % Trial Properties
             separator = strfind(eye.events.description{4, 1}, '_');
@@ -103,55 +108,64 @@ try
             focus = eye.events.description{iTrial, 1}((separator(1, 3) + 1) : separator(1, 3) + 2);
             target = eye.events.description{iTrial, 1}((separator(1, 4) + 1) : separator(1, 4) + 2);
             
-            switch simbol
-                case {'cr'}; titleSimbol = 'Crossed';
-                case {'es'}; titleSimbol = 'Eye-Shaped';
-                case {'tr'}; titleSimbol = 'Triangle';
-                case {'do'}; titleSimbol = 'Dotted';
-                case {'st'}; titleSimbol = 'Striped';
-                case {'sq'}; titleSimbol = 'Square';
-                otherwise; titleSimbol = simbol;
-            end
+            fileTarget = which([simbol, '_', focus, '_', target, '.mat']);
             
-            switch focus
-                case {'lf'}; titleFocus = 'Low focus';
-                case {'hf'}; titleFocus = 'High focus';
-                otherwise; titleFocus = focus;
-            end
-            
-            
-            hold on
-            
-            title(['Fixations of ', titleFocus, ' with ', titleSimbol, ' stimuli [', target, ']']);
-            h = 1050; w = 1680; axis([0 w 0 h]);
-            
-            % Plot Stimulus
-            imageStimulus = imread(which([simbol, '_', focus, '_', target, '.tif']));
-            image([0 w], [h 0], imageStimulus);
-            
-            % Plot Fixations
-            load(which([simbol, '_', focus, '_', target, '.mat']));
-            nTrialFixations = length(fixations(iTrial).location.x);
-            for iTrialFixations = 1 : nTrialFixations
-                centerFixation = [fixations(iTrial).location.x(iTrialFixations), fixations(iTrial).location.y(iTrialFixations)];
-                [checkOnTarget, colourFixations] = checkFixationOnTarget(centerFixation, centerTarget, diameterTarget);
-                plotFixation(centerFixation, (fixations(iTrial).duration(iTrialFixations)/100000), 1000, colourFixations);
-                % x = centerFixation(1); y = centerFixation(2); text(x, y, [num2str(iTrialFixations), ' [x: ', num2str(x), ', y: ', num2str(y), ']'])
+            if (exist(fileTarget) ~= 0)
+                load(fileTarget);
                 
-                if checkOnTarget
-                    eyeWithoutThreesholdedFixations.fixations.isOnTarget(find(eyeWithoutThreesholdedFixations.fixations.number == fixations(iTrial).number(iTrialFixations)), 1) = true;
-                    eye.fixations.isOnTarget(find(eye.fixations.number == fixations(iTrial).number(iTrialFixations)), 1) = true;
+                switch simbol
+                    case {'cr'}; titleSimbol = 'Crossed';
+                    case {'es'}; titleSimbol = 'Eye-Shaped';
+                    case {'tr'}; titleSimbol = 'Triangle';
+                    case {'do'}; titleSimbol = 'Dotted';
+                    case {'st'}; titleSimbol = 'Striped';
+                    case {'sq'}; titleSimbol = 'Square';
+                    otherwise; titleSimbol = simbol;
                 end
+                
+                switch focus
+                    case {'lf'}; titleFocus = 'Low focus';
+                    case {'hf'}; titleFocus = 'High focus';
+                    otherwise; titleFocus = focus;
+                end
+                
+                
+                hold on
+                h = 1050; w = 1680; axis([0 w 0 h]);
+                
+                % Plot Stimulus
+                if checkPlot
+                    title(['Fixations of ', titleFocus, ' with ', titleSimbol, ' stimuli [', target, ']']);
+                    imageStimulus = imread(which([simbol, '_', focus, '_', target, '.tif']));
+                    image([0 w], [h 0], imageStimulus);
+                end
+                % Plot Fixations
+                nTrialFixations = length(fixations(iTrial).location.x);
+                for iTrialFixations = 1 : nTrialFixations
+                    centerFixation = [fixations(iTrial).location.x(iTrialFixations), fixations(iTrial).location.y(iTrialFixations)];
+                    [checkOnTarget, colourFixations] = checkFixationOnTarget(centerFixation, centerTarget, diameterTarget);
+                    if checkPlot
+                        plotFixation(centerFixation, (fixations(iTrial).duration(iTrialFixations)/100000), 1000, colourFixations);
+                        % x = centerFixation(1); y = centerFixation(2); text(x, y, [num2str(iTrialFixations), ' [x: ', num2str(x), ', y: ', num2str(y), ']'])
+                    end
+                    if checkOnTarget
+                        eyeWithoutThreesholdedFixations.fixations.isOnTarget(find(eyeWithoutThreesholdedFixations.fixations.number == fixations(iTrial).number(iTrialFixations)), 1) = true;
+                        eye.fixations.isOnTarget(find(eye.fixations.number == fixations(iTrial).number(iTrialFixations)), 1) = true;
+                    end
+                end
+                
+                if checkPlot
+                    plot(fixations(iTrial).location.x, fixations(iTrial).location.y, '-b')
+                    
+                    % Plot Target
+                    nTarget = size(centerTarget, 1);
+                    for iTarget = 1 : nTarget
+                        plotTarget(centerTarget(iTarget, :), diameterTarget/2, 'k');
+                    end
+                end
+                hold off
+                
             end
-            plot(fixations(iTrial).location.x, fixations(iTrial).location.y, '-b')
-            
-            % Plot Target
-            nTarget = size(centerTarget, 1);
-            for iTarget = 1 : nTarget
-                plotTarget(centerTarget(iTarget, :), diameterTarget/2, 'k');
-            end
-            
-            hold off
         end
     end
     
