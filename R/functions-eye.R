@@ -81,5 +81,67 @@ fixationStats <- function(x) {
 }
 
 
+fixationOnTarget <- function(eye, expdef, th = 60) {
+  locs <- get_expdef_tarloc(eye, expdef)
+  
+  de <- as.matrix(eye[, c("x", "y")])
+  lo <- as.matrix(locs[, c("x", "y")])
+  
+  fixdist <- flexclust::distEuclidean(de, lo)
+  isTarfix <- which(fixdist < th, arr.ind = TRUE)
+  
+  isTarfix[, "row"]
+}
 
 
+targetsFixated <- function(eye, expdef, th = 60) {
+  locs <- get_expdef_tarloc(eye, expdef)
+
+  de <- as.matrix(eye[, c("x", "y")])
+  lo <- as.matrix(locs[, c("x", "y")])
+  
+  fixdist <- flexclust::distEuclidean(de, lo)
+  isTarfix <- which(fixdist < th, arr.ind = TRUE)
+  
+  unique(isTarfix[, "col"])
+}
+
+
+plotFixationOnTarget <- function(eye, expdef, th = 60) {
+  locs <- get_expdef_tarloc(eye, expdef)
+  
+  f <- fixationOnTarget(eye, expdef, th = th)
+  
+  op <- par(mar = c(4, 4, 0, 0) + 0.1)
+  plot(locs[, c("x", "y")], xlim = c(0, 1680),  ylim = c(0, 1050), col = "red", pch = 19)
+  symbols(locs[, c("x", "y")], circles = rep(60, nrow(locs[, c("x", "y")])), add = TRUE, inches = FALSE)
+  points(eye[f, c("x", "y")], col = "black", pch = 19)
+  par(op)
+}
+
+
+
+getNumTargetsFixated <- function(x) {
+  tr <- sort(unique(x$trial))
+  sapply(tr, function(i) length(targetsFixated(get_trial(x, i), expdef)))
+}
+
+getNumTargetsAnswer <- function(x) {
+  tr <- sort(unique(x$Trial))
+  sapply(tr, function(i) get_trial(x, i)$Answer)
+}
+
+getNumTargetsTrue <- function(x) {
+  tr <- sort(unique(x$Trial))
+  sapply(tr, function(i) get_trial(x, i)$Target)
+}
+
+getNumTarFix <- function(eye, beh) {
+  fi <- getNumTargetsFixated(eye)
+  an <- getNumTargetsAnswer(beh)
+  tr <- getNumTargetsTrue(beh)
+  
+  cbind(Fixated = fi,
+        Answered = an[seq(along = fi)],
+        True = tr[seq(along = fi)])
+}

@@ -112,26 +112,64 @@ readExpSetup <- function(file) {
 }
 
 
-loadExpSetup <- function(SETUPDIR) {
+readTargetLocation <- function(file) {
+  loc <- readMat(file)
+  loc <- loc$centerTarget
   
+  loc <- as.data.frame(loc)
+  colnames(loc) <- c("x", "y")
+  
+  loc <- cbind(Condition = sub(".+/(.+)_(.+)_(\\d+).mat", "\\2", file),
+               Symbol = sub(".+/(.+)_(.+)_(\\d+).mat", "\\1", file),
+               Targets = as.numeric(sub(".+/(.+)_(.+)_(\\d+).mat", "\\3", file)),
+               loc)
+  
+  loc
+}
+
+
+loadExpSetup <- function(SETUPDIR, TARLOCDIR) {
+  
+  ## Read XML setup:
   conditions <- list.files(SETUPDIR, full = TRUE)
   files <- lapply(conditions, list.files, pattern = ".*xml", full = TRUE, recursive = TRUE)
   files <- unlist(files, recursive = FALSE)
   setups <- lapply(files, readExpSetup)
   
   def <- getExpDef()
+  def_string <- apply(def, 1, function(x) paste(x["Condition"], x["Symbol"], x["Target"],  sep= "-"))
   
   sd <- data.frame(Cond = as.character(sapply(setups, function(x) x$Condition[1])),
                    Symb = as.character(sapply(setups, function(x) x$Symbol[1])),
                    Tars = sapply(setups, function(x) x$Targets[1]),
                    stringsAsFactors = FALSE)
+  sd <- apply(sd, 1, paste, collapse = "-")
   
-  ssd <- apply(sd, 1, paste, collapse = "-")
-  sdef <- apply(def, 1, function(x) paste(x["Condition"], x["Symbol"], x["Target"],  sep= "-"))
+  setups <- setups[match(def_string, sd)]
   
-  setups <- setups[match(sdef, ssd)]
   
-  list(Trials = def, Stimuli = setups)
+  ## Read hand-crafted true target locations:
+  files <- list.files(TARLOCDIR, full = TRUE)
+  tarlocs <- lapply(files, readTargetLocation)
+  
+  tl <- data.frame(Cond = as.character(sapply(tarlocs, function(x) x$Condition[1])),
+                   Symb = as.character(sapply(tarlocs, function(x) x$Symbol[1])),
+                   Tars = sapply(tarlocs, function(x) x$Targets[1]),
+                   stringsAsFactors = FALSE)
+  tl <- apply(tl, 1, paste, collapse = "-")
+  
+  tarlocs <- tarlocs[match(def_string, tl)]
+  
+  
+  list(Trials = def, Stimuli = setups, TargetLocs = tarlocs)
+}
+
+
+get_expdef_tarloc <- function(x, expdef) {
+  estr <- sprintf("%s-%s-%s", expdef$Trials$Condition, expdef$Trials$Symbol, expdef$Trials$Trial)
+  xstr <- sprintf("%s-%s-%s", x$Condition[1], x$Symbol[1], x$trial[1])
+  
+  expdef$TargetLocs[[match(xstr, estr)]]
 }
 
 
