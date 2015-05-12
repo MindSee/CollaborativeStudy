@@ -4,7 +4,7 @@ source("functions-eye.R")
 
 ### Read fixation data: ##############################################
 
-EYEDIR <- "~/Workspace/MindSee/data/bbciMat/"
+EYEDIR <- "~/MindSee/data/bbciMat/"
 
 participants <- list.files(EYEDIR, full = TRUE)
 files <- lapply(participants, list.files, pattern = "EyeEvent_*", full = TRUE)
