@@ -1,13 +1,14 @@
 function [] = findTheCenterOfTarget(simbol, focus, target)
-% --
+% Find the center of the target.
 %
 %   Syntax:
 %          [] = findTheCenterOfTarget(simbol, focus, target)
 %
 %   Parameters:
-%           simbol
-%           focus
-%           target
+%           simbol                  Simbol of the target (cr, es, tr, do,
+%                                   st, sq).
+%           focus                   Focus of the target (lf, hf).
+%           target                  Number of the target.
 %
 %   Return values:
 %           --
@@ -65,4 +66,4 @@ try
         disp(['The coordinates are saved into: ', imageFilePath, simbol, '_', focus, '_', target, '.mat .']); else disp('Error.');
     end
     
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end

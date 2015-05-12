@@ -270,7 +270,7 @@ try
         end
     end
     
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function [RAW, TABLE] = idfEventImport(input, checkSave)
 % Import a eye tracker parameters from eyeAcquisition.
@@ -349,7 +349,7 @@ try
         end
     end
     
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function [eye] = convertEyes2Eye(input)
 % Convert the eyes structure into a eye structure, that contains the mean
@@ -574,7 +574,7 @@ try
         end
     end
     
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function [res] = isTXT(fileTXT)
 try
@@ -587,7 +587,7 @@ try
             res = true;
         end
     end
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function [res] = isXLS(fileXLS)
 try
@@ -600,7 +600,7 @@ try
             res = true;
         end
     end
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function [res] = isXLSX(fileXLSX)
 try
@@ -613,7 +613,7 @@ try
             res = true;
         end
     end
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function [res] = isMAT(fileMAT)
 try
@@ -626,4 +626,4 @@ try
             res = true;
         end
     end
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end

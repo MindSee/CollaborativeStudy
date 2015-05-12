@@ -63,7 +63,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
     
     epo_all=proc_selectChannels(epo_all,'not',unique(rClab_trials))
     
-    spec{tp}= proc_spectrum(epo_all, [2 60]);
+    spec{tp}= proc_spectrum(epo_all, [1 60]);
     spec_r{tp}= proc_rSquareSigned(spec{tp},'Stats',1);    
     spec_avg{tp}= proc_average(spec{tp},'Stats',1);                   
 end
@@ -72,33 +72,38 @@ end
 spec_ga= proc_grandAverage(spec_avg{2:end},'Stats',1);
 spec_r_ga= proc_grandAverage(spec_r{2:end},'Stats',1);
 
+%%
+BTB.FigDir= '/Volumes/data/CollaborativeStudy/';
+opt_fig= struct('folder', fullfile(BTB.FigDir), 'format', 'bmp');
+
 
 % Plot
 colOrder= [245 159 0; 0 150 200]/255;
 opt_grid_spec= defopt_spec('xTickAxes','CPz', 'colorOrder',colOrder);
 
-%{
-for tp=1:numel(subdir_list)
-    fig_set(tp);
-    H= grid_plot(spec{tp}, mnt, opt_grid_spec,'XUnit', spec{tp}.xUnit, 'YUnit', spec{tp}.yUnit)
-    grid_addBars(spec_r{tp}, 'HScale',H.scale);
-end
-%}
+% 
+% for tp=1:numel(subdir_list)
+%     fig_set(tp);
+%     H= grid_plot(spec{tp}, mnt, opt_grid_spec,'XUnit', spec{tp}.xUnit, 'YUnit', spec{tp}.yUnit)
+%     grid_addBars(spec_r{tp}, 'HScale',H.scale);
+% end
+
 
 % fig_set(numel(subdir_list)+1);
-% H= grid_plot(spec_ga, mnt, opt_grid_spec,'XUnit', spec_ga.xUnit, 'YUnit', spec_ga.yUnit);
-% grid_addBars(spec_r_ga, 'HScale',H.scale);
+H= grid_plot(spec_ga, mnt, opt_grid_spec,'XUnit', spec_ga.xUnit, 'YUnit', spec_ga.yUnit);
+grid_addBars(spec_r_ga, 'HScale',H.scale);
+print('-dbmp',[ opt_fig.folder 'GA_grid.' opt_fig.format]);
 
 spec_ga_forVisual=spec_ga;
-spec_ga_forVisual.x=spec_ga.x(1:35,:,:);
-spec_ga_forVisual.t=spec_ga.t(1:35)
+spec_ga_forVisual.x=spec_ga.x(1:45,:,:);
+spec_ga_forVisual.t=spec_ga.t(1:45)
 
 spec_r_ga_forVisual=spec_r_ga;
-spec_r_ga_forVisual.x=spec_r_ga.x(1:35,:,:);
-spec_r_ga_forVisual.t=spec_r_ga.t(1:35)
+spec_r_ga_forVisual.x=spec_r_ga.x(1:45,:,:);
+spec_r_ga_forVisual.t=spec_r_ga.t(1:45)
 
-clab={'O1','FC1'}
-band_list= [4 7; 8 12; 13 15; 18 22; 26 36];
+clab={'CP5','O2'}
+band_list= [4 7; 8 12; 20 25; 25 35;35 45];
 figure
 H= plot_scalpEvolutionPlusChannel(spec_ga_forVisual, mnt, clab, band_list, ...
     defopt_scalp_power, ...
@@ -108,11 +113,7 @@ H= plot_scalpEvolutionPlusChannel(spec_ga_forVisual, mnt, clab, band_list, ...
     'XUnit', spec_ga_forVisual.xUnit, 'YUnit', spec_ga_forVisual.yUnit);
 grid_addBars(spec_r_ga_forVisual);
 
-
-BTB.FigDir= '/Volumes/data/CollaborativeStudy/';
-opt_fig= struct('folder', fullfile(BTB.FigDir), 'format', 'png');
 print('-dbmp',[ opt_fig.folder 'GA_spectra.' opt_fig.format]);
-
 
 
 fig_set(4, 'Resize',[1 2/3]);

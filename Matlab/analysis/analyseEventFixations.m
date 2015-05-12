@@ -1,22 +1,27 @@
-function [] = plotEventFixations(input, threesholdFixations)
-% --
+function [eyeUpdate, eyeWithoutThreesholdedFixations] = analyseEventFixations(input, threesholdFixations, diameterTarget)
+% Update and plot the Fixations.
 %
 %   Syntax:
-%          [] = plotEvent(input)
+%          [eyeUpdate, eyeWithoutThreesholdedFixations] = analyseEventFixations(input)
+%          [eyeUpdate, eyeWithoutThreesholdedFixations] = analyseEventFixations(input, threesholdFixations)
+%          [eyeUpdate, eyeWithoutThreesholdedFixations] = analyseEventFixations(input, threesholdFixations, diameterTarget)
 %
 %   Parameters:
 %           eye                         Eye monocular structure.
+%           threesholdFixations         Threeshold of Fixations in
+%                                       micro-second.
+%           diameterTarget              Diameter of the target in px.
 %
 %   Return values:
-%           --
+%           eyeUpdate                           Eye struct updated
+%           eyeWithoutThreesholdedFixations     Eye struct without the
+%                                       fixations with the duratione under
+%                                       the threeshold.
 %
 %	Author: Filippo M.  06/05/2015
 
 
 try
-    close all
-    clc
-    
     % Nargin
     if nargin < 1
         [eye] = convertEventTxt2Mat();
@@ -28,33 +33,60 @@ try
             [eye] = convertEventTxt2Mat(input);
         end
     end
-    if nargin < 2
-        threesholdFixations = 150000;  % threesholdFixations = 0;
+    if nargin < 3
+        % Diameter of the Target in pixels
+        diameterTarget = 60;
+        if nargin < 2
+            % Threeshold of Fixations in micro-second
+            threesholdFixations = 150000;
+            % threesholdFixations = 0;
+        end
     end
+    
+    eyeWithoutThreesholdedFixations = eye;
+    eyeWithoutThreesholdedFixations.fixations = [];
     
     nFixations = length(eye.fixations.trial);
     nTrials = max(eye.fixations.trial);
     
     iOldTrial = 0;
-    
+    iUpdateFixations = 0;
     for iFixations = 1 : nFixations
         
         iTrial = eye.fixations.trial(iFixations, 1);
         if (iTrial ~= iOldTrial)
-            counterFixations = 1;
-        else
-            counterFixations = counterFixations + 1;
+            counterFixations = 0;
         end
         
-        % Fixation
+        % Threeshold Fixation
         if ((eye.fixations.duration(iFixations, 1) > threesholdFixations) == true)
+            counterFixations = counterFixations + 1;
             fixations(iTrial).duration(counterFixations) = eye.fixations.duration(iFixations, 1);
             fixations(iTrial).duration(counterFixations) = eye.fixations.duration(iFixations, 1);
             fixations(iTrial).location.x(counterFixations) = eye.fixations.location.x(iFixations, 1);
             fixations(iTrial).location.y(counterFixations) = eye.fixations.location.y(iFixations, 1);
             fixations(iTrial).pupil.size.x(counterFixations) = eye.fixations.pupil.size.x(iFixations, 1);
             fixations(iTrial).pupil.size.y(counterFixations) = eye.fixations.pupil.size.y(iFixations, 1);
+            fixations(iTrial).number(counterFixations) = eye.fixations.number(iFixations, 1);
+            
+            % eyeWithoutThreesholdedFixations
+            iUpdateFixations = iUpdateFixations + 1;
+            eyeWithoutThreesholdedFixations.fixations.trial(iUpdateFixations, 1) = eye.fixations.trial(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.number(iUpdateFixations, 1) = eye.fixations.number(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.start(iUpdateFixations, 1) = eye.fixations.start(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.end(iUpdateFixations, 1) = eye.fixations.end(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.duration(iUpdateFixations, 1) = eye.fixations.duration(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.location.x(iUpdateFixations, 1) = eye.fixations.location.x(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.location.y(iUpdateFixations, 1) = eye.fixations.location.y(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.dispersion.x(iUpdateFixations, 1) = eye.fixations.dispersion.x(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.dispersion.y(iUpdateFixations, 1) = eye.fixations.dispersion.y(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.pupil.size.x(iUpdateFixations, 1) = eye.fixations.pupil.size.x(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.pupil.size.y(iUpdateFixations, 1) = eye.fixations.pupil.size.y(iFixations, 1);
+            eyeWithoutThreesholdedFixations.fixations.plane(iUpdateFixations, 1) = eye.fixations.plane(iFixations, 1);
+            
+            eyeWithoutThreesholdedFixations.fixations.isOnTarget(iUpdateFixations, 1) = false;
         end
+        eye.fixations.isOnTarget(iFixations, 1) = false;
         
         iOldTrial = iTrial;
     end
@@ -87,16 +119,15 @@ try
                 otherwise; titleFocus = focus;
             end
             
-            title(['Fixations of ', titleFocus, ' with ', titleSimbol, ' stimuli [', target, ']']);
             
             hold on
-            diameterTarget = 60;
-            h = 1050; w = 1680;
-            axis([0 w 0 h])
+            
+            title(['Fixations of ', titleFocus, ' with ', titleSimbol, ' stimuli [', target, ']']);
+            h = 1050; w = 1680; axis([0 w 0 h]);
             
             % Plot Stimulus
             imageStimulus = imread(which([simbol, '_', focus, '_', target, '.tif']));
-            image([0 w], [0 h], imageStimulus);
+            image([0 w], [h 0], imageStimulus);
             
             % Plot Fixations
             load(which([simbol, '_', focus, '_', target, '.mat']));
@@ -105,22 +136,28 @@ try
                 centerFixation = [fixations(iTrial).location.x(iTrialFixations), fixations(iTrial).location.y(iTrialFixations)];
                 [checkOnTarget, colourFixations] = checkFixationOnTarget(centerFixation, centerTarget, diameterTarget);
                 plotFixation(centerFixation, (fixations(iTrial).duration(iTrialFixations)/100000), 1000, colourFixations);
+                % x = centerFixation(1); y = centerFixation(2); text(x, y, [num2str(iTrialFixations), ' [x: ', num2str(x), ', y: ', num2str(y), ']'])
+                
+                if checkOnTarget
+                    eyeWithoutThreesholdedFixations.fixations.isOnTarget(find(eyeWithoutThreesholdedFixations.fixations.number == fixations(iTrial).number(iTrialFixations)), 1) = true;
+                    eye.fixations.isOnTarget(find(eye.fixations.number == fixations(iTrial).number(iTrialFixations)), 1) = true;
+                end
             end
+            plot(fixations(iTrial).location.x, fixations(iTrial).location.y, '-b')
             
             % Plot Target
             nTarget = size(centerTarget, 1);
             for iTarget = 1 : nTarget
-                % plot(centerTarget(iTarget, 1), centerTarget(iTarget, 2), '*r', 'MarkerSize', 8);
-                plotTarget(centerTarget(iTarget, :), 30, 'k');
+                plotTarget(centerTarget(iTarget, :), diameterTarget/2, 'k');
             end
             
             hold off
         end
     end
     
-    disp('ok')
+    eyeUpdate = eye;
     
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function [checkOnTarget, colourFixations] = checkFixationOnTarget(centerFixation, centerTarget, diameterTarget)
 % --
@@ -142,7 +179,7 @@ function [checkOnTarget, colourFixations] = checkFixationOnTarget(centerFixation
 
 try
     checkOnTarget = false;
-    colourFixations = 'k';
+    colourFixations = 'b';
     
     xCenterFixation = centerFixation(1);
     yCenterFixation = centerFixation(2);
@@ -159,13 +196,11 @@ try
                 (yCenterFixation <= (yCenterTarget + (diameterTarget/2))) && ...
                 (yCenterFixation >= (yCenterTarget - (diameterTarget/2)))
             checkOnTarget = true;
-            colourFixations = 'g';
-        else
-            % disp([num2str(fix(xCenterFixation)), ' ', num2str(fix(yCenterFixation))]);
+            colourFixations = 'k';
         end
     end
     
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function [h] = plotFixation(center, r, N, color)
 % Draws a circle filled with COLOR that has CENTER as its center and R as
@@ -192,11 +227,10 @@ try
     [x, y] = pol2cart(theta, rho);
     x = x + center(1);
     y = y + center(2);
-    h = fill(x, y, color);
-    axis square;
+    h = fill(x, y, color); axis square;
     plot(x, y, color);
     
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
 
 function [] = plotTarget(center, r, color)
 % Draws a circle with COLOR that has CENTER as its center and R as
@@ -225,4 +259,4 @@ try
     yp = r * sin(ang);
     plot(x + xp, y + yp, color);
     
-catch ME; if (exist('saveMException.p', 'file')); saveMException(ME); end; end
+catch ME; if (exist('saveMException.m', 'file')); saveMException(ME); end; end
