@@ -3,7 +3,7 @@ disp('Converting peripheral physiological signals...')
 
 global BTB
 
-convertBase;
+convertBaseEEG; % Selected subjects
 
 for tp=1:numel(subdir_list) % Select one of the test persons
     

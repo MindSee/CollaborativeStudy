@@ -4,8 +4,11 @@ global BTB
 
 convertBaseEEG;
 
-bands_all={[1 3] [4 7] [8 12] [13 30] [31 50]};
-bands_names={'Delta' 'Theta' 'Alpha' 'Beta' 'Gamma'};
+PermuteLabels=true; % Check classification and if block effect exist
+idx_permuted=reshape(randperm(12),[2,6]);
+
+bands_all={[1 3] [4 7] [8 12] [13 30] [31 50] [60 80]};
+bands_names={'Delta' 'Theta' 'Alpha' 'Beta' 'Gamma' 'HighGamma'};
 AUC_all=zeros(numel(subdir_list), numel(bands_all));
 
 for i_band=1:numel(bands_all)
@@ -27,6 +30,10 @@ for i_band=1:numel(bands_all)
             % Get tags of the current condition
             idx=strfind(tags,conditions{c});
             idx= find(not(cellfun('isempty', idx)));
+            
+            % Check classification and if block effect exist
+            if(PermuteLabels), idx=idx_permuted(c,:); end
+            
             tags_condition= tags(idx);
             
             % Load files of the current condition
@@ -42,7 +49,7 @@ for i_band=1:numel(bands_all)
                 blk=blk_segmentsFromMarkersNew(mrk, 'start_marker','Start','end_marker','Stop');
                 blk.className={conditions{c}};
                 blk.y= ones(1, size(blk.ival,2));
-                blk.fs=cnt.fs;
+                %blk.fs=cnt.fs;
                 
                 %New function not complete but not necessary(?):
                 %[cnt_new, blk_new, mrk_new]= proc_concatBlocksNew(cnt, blk, mrk);
@@ -128,4 +135,7 @@ for i_band=1:numel(bands_all)
 end
 
 opt_fig= struct('folder', fullfile(BTB.FigDir));
-util_printFigure(['EEG-classification-CSP'], [1 1]*7, opt_fig);
+% Check classification and if block effect exist
+fname='EEG-classification-CSP';
+if(PermuteLabels), fname=[fname '-Permuted-Labels']; end
+util_printFigure(fname, [1 1]*7, opt_fig);

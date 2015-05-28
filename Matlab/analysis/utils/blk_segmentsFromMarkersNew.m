@@ -35,6 +35,7 @@ function blk = blk_segmentsFromMarkersNew(mrk, varargin)
 %                   'exclude_end_marker', ''; ...
 %                   'start_first_block', 0; ...
 %                   'skip_unfinished', 1});
+
 opt= opt_proplistToStruct(varargin{:});
 
 props={'start_marker'     {'New Segment',''} 'CHAR'

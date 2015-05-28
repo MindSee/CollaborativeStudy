@@ -47,7 +47,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         end
     end
     
-    spec{tp}= proc_spectrum(epo_all, [2 60]);
+    spec{tp}= proc_spectrum(epo_all, [2 80]);
     spec_r{tp}= proc_rSquareSigned(spec{tp},'Stats',1);    
     spec_avg{tp}= proc_average(spec{tp},'Stats',1);                   
 end
@@ -78,7 +78,7 @@ grid_addBars(spec_r_ga, 'HScale',H.scale);
 util_printFigure(['EEG-spectra-grid'], [2 1]*9, opt_fig);
 %% Spectra all channels as scalp map plus two channels
 clab={'CP1','O2'}
-band_list= [1 3; 4 7; 8 12; 13 30; 31 50];
+band_list= [1 3; 4 7; 8 12; 13 30; 31 50; 60 80];
 fig_set(numel(subdir_list)+2);
 H= plot_scalpEvolutionPlusChannel(spec_ga, mnt, clab, band_list, ...
     defopt_scalp_power, ...
@@ -88,7 +88,7 @@ H= plot_scalpEvolutionPlusChannel(spec_ga, mnt, clab, band_list, ...
     'XUnit', spec_ga.xUnit, 'YUnit', spec_ga.yUnit);
 grid_addBars(spec_r_ga);
 util_printFigure(['EEG-spectra-scalps'], [2 1]*9, opt_fig);
-%% Signed-r²
+%% Signed-r^2
 fig_set(numel(subdir_list)+3);
 bands_all={[1 3] [4 7] [8 12] [13 30] [31 50]};
 H= plot_scalpEvolutionPlusChannel(spec_r_ga, mnt, {}, band_list, ...
