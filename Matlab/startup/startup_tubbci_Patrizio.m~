@@ -10,7 +10,7 @@ pathPatrizio = which('startup_tubbci_Patrizio.m');
 [pathPatrizio,NAME,EXT] = fileparts(pathPatrizio);
 pathPatrizio = [pathPatrizio, filesep];
 index = strfind(pathPatrizio, filesep);
-pathMindSee = pathPatrizio(1 : index(end-3));
+pathMindSee = pathPatrizio(1 : index(end-3))
 addpath(genpath(pathMindSee));
 
 cd([pathMindSee]);
@@ -18,13 +18,13 @@ cd([pathMindSee]);
 global BTB
 
 % Path of the data directory for EEG and log files
-DATA_DIR = fullfile(pathMindSee, 'data')
+DATA_DIR = fullfile(pathMindSee, 'data');
 
 % Path of the BBCI public toolbox
-BBCI_DIR = fullfile(pathMindSee, 'bbci_public')
+BBCI_DIR = fullfile(pathMindSee, 'bbci_public');
 
 % Folder with convert and analysis scripts
-BBCI_PRIVATE_DIR = fullfile(pathMindSee, 'CollaborativeStudy')
+BBCI_PRIVATE_DIR = fullfile('/Users/patrikpluchino/Desktop/', 'CollaborativeStudy');
 
 cd(BBCI_DIR);
 startup_bbci_toolbox('DataDir', DATA_DIR,...
@@ -41,6 +41,3 @@ format compact
 format longg
 
 convertPeripheral
-
-disp('Finish')
-disp('If you want then to reload the converted data, you can have a look at the first 28 lines of "EEG_analysis_spectra.m".')
