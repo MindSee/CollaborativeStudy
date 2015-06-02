@@ -7,8 +7,6 @@ LEDALAB_DIR = fullfile('/Users/eugstem1/Workspace/MindSee/3rdParty/Ledalab');
 
 convertBase;
 
-subdir_list = subdir_list(1:3);
-
 
 for tp=1:numel(subdir_list) % Select one of the test persons
     
