@@ -39,8 +39,8 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             start_ms = min(blk.ival(:));
             stop_ms = max(blk.ival(:));
             
-            start_ms = start_ms - (1 * 1000);
-            stop_ms = stop_ms + (1 * 1000);
+            start_ms = start_ms - (1 * 1000);  % add one second at the beginning
+            stop_ms = stop_ms + (1 * 1000);    % ... and end
 
             start_idx = round(start_ms / (1000 / blk.fs));
             stop_idx = round(stop_ms / (1000 / blk.fs));
@@ -54,6 +54,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             
             % Additional trial information:
             data.trials = blk.ival - start_ms;
+            data.fs = blk.fs;
             
             filename = fullfile(BTB.LedalabDir, [subdir_list{tp}, '_EDA_' tags_condition{t} '_' tpcode '.mat']);
             
@@ -63,6 +64,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
 end
 
 % Execute Ledalab batch job:
+%copyfile(BTB.LedalabDir, [BTB.LedalabDir, '_orig']);
 %cd(LEDALAB_DIR);
 %Ledalab(BTB.LedalabDir, 'open', 'mat', 'analyze', 'CDA', 'optimize', 4);
 
