@@ -136,7 +136,7 @@ try
                 % Plot Stimulus
                 if checkPlot
                     title(['Fixations of ', titleFocus, ' with ', titleSimbol, ' stimuli [', target, ']']);
-                    imageStimulus = imread(which([simbol, '_', focus, '_', target, '.tif']));
+                    imageStimulus = imread(which([simbol, '_', focus, '_', target, '.jpg']));
                     image([0 w], [h 0], imageStimulus);
                 end
                 % Plot Fixations
