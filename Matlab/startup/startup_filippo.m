@@ -1,9 +1,8 @@
-% % % % function [] = startup_filippo()
-% % % % startup_filippo
+% % function [] = startup_filippo()
 
-% % % % WorkSpace
-% % % clear all
-% % % close all
+% WorkSpace
+clear all
+close all
 clc
 
 % Paths
@@ -18,6 +17,9 @@ global BTB
 
 % Path of the data directory for EEG and log files
 DATA_DIR = fullfile(pathMindSee, 'data');
+mkdir(DATA_DIR, 'bbciMat');
+mkdir(DATA_DIR, 'bbciRaw');
+mkdir(DATA_DIR, 'tmp');
 
 % Path of the BBCI public toolbox
 BBCI_DIR = pathBBCI;
