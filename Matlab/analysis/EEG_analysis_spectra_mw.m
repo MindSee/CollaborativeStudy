@@ -1,27 +1,45 @@
+clearvars -except BTB
 disp('Spectral analysis of EEG data...')
 
 global BTB
 
-convertBase;
+convertBaseEEG;
 
 spec={};
 spec_r={};
 spec_avg={};
+
+% Check classification and if block effect exist
+PermuteBlocks=1;
+switch 4
+    case 1% Unbalanced permutation
+        idx_permuted=reshape(randperm(12),[2,6]);
+    case 2 % Balanced permutation
+        idx_permuted=[ 1 2 5 6 9 10; 3 4 7 8 11 12];
+    case 3 % First half against second half
+        idx_permuted=[ 1:6; 7:12 ];
+    case 4 % Balanced and symmetric permutation
+        idx_permuted=[1 12 3 10 5 8; 2 11 4 9 6 7];
+end
 
 for tp=1:numel(subdir_list) % Select one of the test persons
     
     tpcode=regexp(subdir_list{tp},'_','split'); tpcode=tpcode{1};
     BTB.Tp.Dir=fullfile(BTB.MatDir,subdir_list{tp});
     
-    % Load the EEG files of the two conditions "high focus" and "low focus"    
+    % Load the EEG files of the two conditions "high focus" and "low focus"
     epo_all=[];
     conditions={'hf' 'lf'};
-    for c=1:2        
+    for c=1:2
         % Get tags of the current condition
         idx=strfind(tags,conditions{c});
         idx= find(not(cellfun('isempty', idx)));
+        
+        % Check classification and if block effect exist
+        if(PermuteBlocks), idx=idx_permuted(c,:); end
+        
         tags_condition= tags(idx);
-                
+        
         % Load files of the current condition
         for t=1:numel(tags_condition)
             file= fullfile(BTB.MatDir, subdir_list{tp},['EEG_' tags_condition{t} '_' tpcode '.mat']);
@@ -38,24 +56,30 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             
             % Add markers every 2000 ms only during stimulus presentation
             mkk= mrk_evenlyInBlocksNew(blk, 2000);
-            epo=proc_segmentation(cnt, mkk, [0  2000]);
+            epo=proc_segmentation(cnt, mkk, [0  2000]);            
             if (t==1 && c==1)
                 epo_all=epo;
             else
-                epo_all = proc_appendEpochs(epo_all, epo);
+                epo_all = proc_appendEpochs(epo_all, epo);                
             end
         end
     end
     
-    spec{tp}= proc_spectrum(epo_all, [2 80]);
-    spec_r{tp}= proc_rSquareSigned(spec{tp},'Stats',1);    
-    spec_avg{tp}= proc_average(spec{tp},'Stats',1);                   
+    % Remove field "event" because proc_appendEpochs does not append it
+    epo_all=rmfield(epo_all,'event');
+    
+    spec{tp}= proc_spectrum(epo_all, [1 80]);
+    spec_r{tp}= proc_rSquareSigned(spec{tp},'Stats',1);
+    spec_avg{tp}= proc_average(spec{tp},'Stats',1);
 end
 %%
 % Compute grand average
 spec_ga= proc_grandAverage(spec_avg{1:end},'Stats',1);
 spec_r_ga= proc_grandAverage(spec_r{1:end},'Stats',1);
 
+% Remove these apparently broken channels
+%spec_ga=proc_selectChannels(spec_ga,'not',{'CP1', 'PO2', 'O1'});
+%spec_r_ga=proc_selectChannels(spec_r_ga,'not',{'CP1', 'PO2', 'O1'});
 
 % Plot
 colOrder= [245 159 0; 0 150 200]/255;
@@ -78,6 +102,7 @@ grid_addBars(spec_r_ga, 'HScale',H.scale);
 util_printFigure(['EEG-spectra-grid'], [2 1]*9, opt_fig);
 %% Spectra all channels as scalp map plus two channels
 clab={'CP1','O2'}
+%clab={'O1'}
 band_list= [1 3; 4 7; 8 12; 13 30; 31 50; 60 80];
 fig_set(numel(subdir_list)+2);
 H= plot_scalpEvolutionPlusChannel(spec_ga, mnt, clab, band_list, ...
@@ -98,6 +123,3 @@ H= plot_scalpEvolutionPlusChannel(spec_r_ga, mnt, {}, band_list, ...
     'GlobalCLim',1,...
     'XUnit', spec_ga.xUnit, 'YUnit', spec_ga.yUnit);
 util_printFigure(['EEG-spectra-r-scalps'], [2 1]*8, opt_fig);
-
-
-

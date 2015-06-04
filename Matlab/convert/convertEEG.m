@@ -1,17 +1,7 @@
 function [] = convertEEG()
-% Convert the EEG signals.
-% 
+% Convert the EEG signals. 
 %   Syntax:
 %          [] = convertEEG()
-%
-%   Parameters:
-%           --
-%
-%   Return values:
-%           --
-%
-%	Author: Markus W.  05/05/2015
-
 
 disp('Converting EEG signals...')
 
@@ -61,7 +51,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         [ET_mrk] = readETMarkers(file);
         
         % Remove bipolar electrodes of electrodes for facial EMG and electrodermal activity
-        cnt = proc_selectChannels(cnt,'not',{'fEMG1' 'fEMG2' 'fEMG3' 'fEMG4' 'EDA1' 'EDA2'});
+%         cnt = proc_selectChannels(cnt,'not',{'fEMG1' 'fEMG2' 'fEMG3' 'fEMG4' 'EDA1' 'EDA2'});
         
         
         % Select stimulus markers only and delete stop markers
