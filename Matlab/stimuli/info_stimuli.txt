@@ -1,0 +1,24 @@
+NB: Non cancellare questo documento
+
+Struttura del nome dei file degli stimoli:
+
+fp_fo_nn.tiff
+
+ - fp: sta per FORMA o PATTERN.
+
+	Le forme possono essere 3:
+	 1. cr 
+	 2. es
+	 3. tr
+
+	I pattern possono essere 3:
+	 1. do
+	 2. st
+	 3. sq
+
+ - fo: sta per FOCUS. è possibile avere due tipi di focus:
+
+	 1. lf: LOW FOCUS
+	 2. hf: HIGHT FOCUS
+
+ - nn: sta per il numero degli STIMOLI.
