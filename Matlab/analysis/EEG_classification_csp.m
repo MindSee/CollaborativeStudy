@@ -1,15 +1,31 @@
+clearvars -except BTB
 disp('EEG classification using common spatial patterns...')
 
 global BTB
 
 convertBaseEEG;
 
-PermuteLabels=true; % Check classification and if block effect exist
-idx_permuted=reshape(randperm(12),[2,6]);
+% Check classification and if block effect exist
 
+% NEW PERMUTE EACH BLOCK!
+PermuteEachSingleBlock=0; % Overwrites PermuteBlocks in the following line!
+PermuteBlocks=0;
+switch 4
+    case 1% Unbalanced permutation
+        idx_permuted=reshape(randperm(12),[2,6]);
+    case 2 % Balanced permutation
+        idx_permuted=[ 1 2 5 6 9 10; 3 4 7 8 11 12];
+    case 3 % First half against second half
+        idx_permuted=[ 1:6; 7:12 ];
+    case 4 % Balanced and symmetric permutation
+        idx_permuted=[1 12 3 10 5 8; 2 11 4 9 6 7];
+    case 5 % Take just two random blocks (both either hf or lf!) and compare them
+        idx_permuted=[5; 7];
+end
+    
 bands_all={[1 3] [4 7] [8 12] [13 30] [31 50] [60 80]};
 bands_names={'Delta' 'Theta' 'Alpha' 'Beta' 'Gamma' 'HighGamma'};
-AUC_all=zeros(numel(subdir_list), numel(bands_all));
+AUC_all=nan(numel(subdir_list), numel(bands_all));
 
 for i_band=1:numel(bands_all)
     
@@ -17,7 +33,7 @@ for i_band=1:numel(bands_all)
     fprintf('Frequency band "%s": %i Hz - %i Hz\n', bands_names{i_band}, band);
     
     for tp=1:numel(subdir_list) % Select one of the test persons
-        
+                  
         tpcode=regexp(subdir_list{tp},'_','split'); tpcode=tpcode{1};
         BTB.Tp.Dir=fullfile(BTB.MatDir,subdir_list{tp});
         
@@ -32,7 +48,7 @@ for i_band=1:numel(bands_all)
             idx= find(not(cellfun('isempty', idx)));
             
             % Check classification and if block effect exist
-            if(PermuteLabels), idx=idx_permuted(c,:); end
+            if(PermuteBlocks), idx=idx_permuted(c,:); end
             
             tags_condition= tags(idx);
             
@@ -48,6 +64,12 @@ for i_band=1:numel(bands_all)
                 % Determine periods of stimulus presentation
                 blk=blk_segmentsFromMarkersNew(mrk, 'start_marker','Start','end_marker','Stop');
                 blk.className={conditions{c}};
+                
+                % NEW PERMUTE EACH BLOCK!
+                if PermuteEachSingleBlock
+                    blk.className={conditions{1+(rand>.5)}};
+                end
+                
                 blk.y= ones(1, size(blk.ival,2));
                 %blk.fs=cnt.fs;
                 
@@ -70,15 +92,17 @@ for i_band=1:numel(bands_all)
                 % simple artifact rejection based on max-min criterion
                 %crit_maxmin= 150;
                 %epo= proc_rejectArtifactsMaxMin(epo, crit_maxmin);
-                
+             
                 if (t==1 && c==1)
                     epo_all=epo;
                 else
                     epo_all = proc_appendEpochs(epo_all, epo);
                 end
-            end
+            end            
         end
         
+        % Remove field "event" because proc_appendEpochs does not append it
+        epo_all=rmfield(epo_all,'event');
         
         %% Classification
         fv= epo_all;
@@ -104,8 +128,11 @@ for i_band=1:numel(bands_all)
         % Error in crossvalidation (line 89)
         % [fvTr, memo]= xvalutil_proc(fvTr, opt.Proc.train);
         
+        % Check whether xval works
+        %fv.y=fv.y(:,randperm(size(fv.y,2)) );
+        
         loss= crossvalidation(fv, {@train_RLDAshrink, 'Gamma',0}, ...
-            'SampleFcn',  {@sample_KFold, [10 10]},...
+            'SampleFcn',  {@sample_KFold, [1 5]},...
             'Proc', proc, 'LossFcn', @loss_rocArea);
         %'SampleFcn', {@sample_chronKFold, 8}, ...
         
@@ -113,7 +140,7 @@ for i_band=1:numel(bands_all)
         fprintf('%s %f [AUC]\n', tpcode, AUC_all(tp, i_band) );
     end
     
-    fprintf('*** Mean *** %f [AUC]\n\n',mean(AUC_all(:,i_band)) );
+    fprintf('*** Mean *** %f [AUC]\n\n',nanmean(AUC_all(:,i_band)) );
     
 end
 
@@ -137,5 +164,5 @@ end
 opt_fig= struct('folder', fullfile(BTB.FigDir));
 % Check classification and if block effect exist
 fname='EEG-classification-CSP';
-if(PermuteLabels), fname=[fname '-Permuted-Labels']; end
+if(PermuteBlocks), fname=[fname '-Permuted-Labels']; end
 util_printFigure(fname, [1 1]*7, opt_fig);

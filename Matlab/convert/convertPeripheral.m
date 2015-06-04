@@ -18,18 +18,21 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         hdr= file_readBVheader(file);
         fs_orig=hdr.fs;
         
+        %{
         % Low-pass filter for anti-aliasing
         Wps = [100 120]/hdr.fs*2; % for Fs=250
         [n, Ws] = cheb2ord(Wps(1), Wps(2), 3, 40);
         [filt.b, filt.a]= cheby2(n, 50, Ws);
         %  freqz(filt.b,filt.a,512,hdr.fs)
+        %}
+        filt=[];
         
         clabScalp= hdr.clab(util_scalpChannels(hdr.clab));
         clabNonScalp= hdr.clab(util_chanind(hdr.clab, 'not',clabScalp));
-
         
         % Load raw data, downsampling is done while loading
-        Fs = 250; % new sampling rate
+        %Fs = 250; % new sampling rate
+        Fs = 'raw';
         [cnt, mrk] = file_readBV(file, 'Fs',Fs, 'Filt',filt, 'CLab',clabNonScalp);
         
         % (Re-referencing of bipolar peripheral channels not necessary - in contrast to EEG)                     
