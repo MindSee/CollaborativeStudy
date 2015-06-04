@@ -1,5 +1,18 @@
-function convertEYES
+function [] = convertEYES_mpippo87(diameterTarget, threesholdFixations, checkPlot)
 disp('Converting eye tracking signals...')
+
+% Nargin
+if nargin < 3
+    checkPlot = false;
+    if nargin < 2
+        % Threeshold of Fixations in micro-second
+        threesholdFixations = 150000;
+        if nargin < 1
+            % Diameter of the Target in pixels
+            diameterTarget = 60;
+        end
+    end
+end
 
 global BTB
 
@@ -34,19 +47,20 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         
         % Load eye tracking data
         file=fullfile(BTB.RawDir, subdir_list{tp},['MindSeeCollaborativeStudy2015_' tags{i} '_' tpcode ' Events.txt']);
-        eye = convertEventTxt2Mat(file);        
+        eye = analyseEventFixations(file, checkPlot, threesholdFixations, diameterTarget); % eye = convertEventTxt2Mat(file);
         
         % save in matlab format
         matfilename = fullfile(BTB.MatDir, subdir_list{tp},['EyeEvent_' tags{i} '_' tpcode]);
         
-        [pathstr,name,ext] = fileparts(matfilename);
+        [pathstr, name, ext] = fileparts(matfilename);
         if not(isdir(pathstr)), mkdir(pathstr), end
         
         fprintf('Saving %s\n', matfilename)
         save(matfilename,'eye');
         
         % Clear all unnecessary variables
-        clearvars -except BTB subdir_list tp tpcode tags i
+        clearvars -except BTB subdir_list tp tpcode tags i checkPlot threesholdFixations diameterTarget
+        close all
         
     end
 end
