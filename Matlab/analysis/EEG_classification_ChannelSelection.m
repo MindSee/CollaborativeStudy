@@ -70,10 +70,10 @@ for i_band=1:numel(bands_all)
 %             idx=strfind(epo_all.className,conditions{c});
 %             idx= find(not(cellfun('isempty', idx)));                                     
 %             fv=proc_selectClasses(epo_all,idx);   
-            epo_all.event.blkno=epo_all.event.blkno';
+          
             fv=proc_selectClasses(epo_all,[conditions{c} '*']);
   
-            fv = proc_combineClasses(fv,'left',{'right','foot'});
+            fv = proc_combineClasses(fv,fv.className{2:end});
          end
         
         
