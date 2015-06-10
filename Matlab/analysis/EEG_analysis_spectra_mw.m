@@ -95,7 +95,7 @@ spec_r_ga= proc_grandAverage(spec_r{1:end},'Stats',1);
 % Plot
 colOrder= [245 159 0; 0 150 200]/255;
 opt_grid_spec= defopt_spec('xTickAxes','CPz', 'colorOrder',colOrder);
-opt_fig= struct('folder', fullfile(BTB.FigDir));
+opt_fig= struct('folder', fullfile(BTB.FigDir,'2015-MindSee-Collaborative'));
 
 %{
 for tp=1:numel(subdir_list)

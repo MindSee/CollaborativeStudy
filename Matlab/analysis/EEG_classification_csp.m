@@ -5,12 +5,10 @@ global BTB
 
 convertBaseEEG;
 
-% Check classification and if block effect exist
-
-% NEW PERMUTE EACH BLOCK!
-PermuteEachSingleBlock=0; % Overwrites PermuteBlocks in the following line!
-PermuteBlocks=0;
-switch 4
+% Permute blocks/trials to check classification and if block effect exist
+PermuteBlocks=true;
+PermuteStyle=4;
+switch PermuteStyle
     case 1% Unbalanced permutation
         idx_permuted=reshape(randperm(12),[2,6]);
     case 2 % Balanced permutation
@@ -22,7 +20,10 @@ switch 4
     case 5 % Take just two random blocks (both either hf or lf!) and compare them
         idx_permuted=[5; 7];
 end
-    
+
+% crossvalidation leaving blocks out (1) or sample_KFold (0)
+BlockWiseValidation=1; 
+
 bands_all={[1 3] [4 7] [8 12] [13 30] [31 50] [60 80]};
 bands_names={'Delta' 'Theta' 'Alpha' 'Beta' 'Gamma' 'HighGamma'};
 AUC_all=nan(numel(subdir_list), numel(bands_all));
@@ -65,44 +66,22 @@ for i_band=1:numel(bands_all)
                 blk=blk_segmentsFromMarkersNew(mrk, 'start_marker','Start','end_marker','Stop');
                 blk.className={conditions{c}};
                 
-                % NEW PERMUTE EACH BLOCK!
-                if PermuteEachSingleBlock
-                    blk.className={conditions{1+(rand>.5)}};
-                end
-                
-                blk.y= ones(1, size(blk.ival,2));
-                %blk.fs=cnt.fs;
-                
-                %New function not complete but not necessary(?):
-                %[cnt_new, blk_new, mrk_new]= proc_concatBlocksNew(cnt, blk, mrk);
-                
+                blk.y= ones(1, size(blk.ival,2));                
+                                
                 % Add markers every 2000 ms only during stimulus presentation
                 mkk= mrk_evenlyInBlocksNew(blk, 2000);
-                
-                % Artifact rejection based on variance criterion
-                %art_ival=[0 2000];
-                %mkk= reject_varEventsAndChannels(cnt, mkk, art_ival);%, 'verbose', 1);
-                
-                % Channel with large power in grand average spectrum removed
-                %cnt=proc_selectChannels(cnt, 'not', 'CP1');
+                mkk.event.blkno = repmat(t, size(mkk.event.blkno));
                 
                 % Segmentation into epochs
                 epo=proc_segmentation(cnt, mkk, [0  2000]);
-                
-                % simple artifact rejection based on max-min criterion
-                %crit_maxmin= 150;
-                %epo= proc_rejectArtifactsMaxMin(epo, crit_maxmin);
-             
+                            
                 if (t==1 && c==1)
                     epo_all=epo;
                 else
                     epo_all = proc_appendEpochs(epo_all, epo);
                 end
             end            
-        end
-        
-        % Remove field "event" because proc_appendEpochs does not append it
-        epo_all=rmfield(epo_all,'event');
+        end                
         
         %% Classification
         fv= epo_all;
@@ -116,25 +95,21 @@ for i_band=1:numel(bands_all)
             @proc_logarithm
             };
         
-        if tpcode=='VPpal', continue, end
-        
-        % For VPpal:
-        % Error using eig
-        % Input to EIG must not contain NaN or Inf.
-        % Error in proc_cspAuto (line 90)
-        % [W,D]= eig(R(:,:,2),R(:,:,1)+R(:,:,2));
-        % Error in xvalutil_proc (line 18)
-        % [fv, vals{:}]= cmd{1}(fv, cmd{2:end});
-        % Error in crossvalidation (line 89)
-        % [fvTr, memo]= xvalutil_proc(fvTr, opt.Proc.train);
-        
+        if tpcode=='VPpal', continue, end       
+        % (Error using eig, Input to EIG must not contain NaN or Inf)
+
         % Check whether xval works
         %fv.y=fv.y(:,randperm(size(fv.y,2)) );
         
-        loss= crossvalidation(fv, {@train_RLDAshrink, 'Gamma',0}, ...
-            'SampleFcn',  {@sample_KFold, [1 5]},...
-            'Proc', proc, 'LossFcn', @loss_rocArea);
-        %'SampleFcn', {@sample_chronKFold, 8}, ...
+        if BlockWiseValidation
+            loss= crossvalidation(fv, {@train_RLDAshrink, 'Gamma',0}, ...
+                'SampleFcn',  {@sample_leaveOneBlockOut, fv.event.blkno},...
+                'Proc', proc, 'LossFcn', @loss_rocArea);
+        else
+            loss= crossvalidation(fv, {@train_RLDAshrink, 'Gamma',0}, ...
+                'SampleFcn',  {@sample_KFold, [1 5]},...
+                'Proc', proc, 'LossFcn', @loss_rocArea);
+        end
         
         AUC_all(tp, i_band)=1-loss; % AOC --> AUC
         fprintf('%s %f [AUC]\n', tpcode, AUC_all(tp, i_band) );
@@ -148,9 +123,8 @@ end
 close all
 fig_set(1,'gridsize',[2 3]);
 boxplot(AUC_all, 'labels', bands_names, 'orientation','vertical');
-%ax=title('EEG classification with CSP','FontWeight','bold');
-ylabel('[AUC]','Color',[0 0 0]);%,'FontSize',8); % Area under roc curve
-set(gca,'YLim',[0.48 1],'TickLength',[0.03 0.03]);
+ylabel('[AUC]','Color',[0 0 0]); % Area under roc curve
+set(gca,'YLim',[0 1],'TickLength',[0.03 0.03]);
 hold on
 
 % Statistical assessment
@@ -161,8 +135,8 @@ for i_band=1:numel(bands_all)
     if h, plot(i_band,0.5,'*k'); end
 end
 
-opt_fig= struct('folder', fullfile(BTB.FigDir));
-% Check classification and if block effect exist
+opt_fig= struct('folder', fullfile(BTB.FigDir,'2015-MindSee-Collaborative'));
 fname='EEG-classification-CSP';
-if(PermuteBlocks), fname=[fname '-Permuted-Labels']; end
-util_printFigure(fname, [1 1]*7, opt_fig);
+if(PermuteBlocks), fname=[fname '-PermutedLabels']; end
+if(BlockWiseValidation), fname=[fname '-BlockWiseValidation']; end
+util_printFigure(fname, [1.3 1]*10, opt_fig);
