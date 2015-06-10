@@ -1,29 +1,11 @@
+% Remove channels informative about the blocks for later CSP classification
+
 clearvars -except BTB
 disp('EEG classification using common spatial patterns...')
 
 global BTB
 
 convertBaseEEG;
-
-% crossvalidation leaving blocks out (1) or sample_KFold (0)
-BlockWiseValidation=0;
-
-% Permute blocks/trials to check classification and if block effect exist
-PermuteBlocks=false;
-PermuteStyle=0;
-switch PermuteStyle
-    case 0 % none
-    case 1% Unbalanced permutation
-        idx_permuted=reshape(randperm(12),[2,6]);
-    case 2 % Balanced permutation
-        idx_permuted=[ 1 2 5 6 9 10; 3 4 7 8 11 12];
-    case 3 % First half against second half
-        idx_permuted=[ 1:6; 7:12 ];
-    case 4 % Balanced and symmetric permutation
-        idx_permuted=[1 12 3 10 5 8; 2 11 4 9 6 7];
-    case 5 % Take just two random blocks (both either hf or lf!) and compare them
-        idx_permuted=[5; 7];
-end
 
 bands_all={[1 3] [4 7] [8 12] [13 30] [31 50] [60 80]};
 bands_names={'Delta' 'Theta' 'Alpha' 'Beta' 'Gamma' 'HighGamma'};
@@ -41,16 +23,13 @@ for i_band=1:numel(bands_all)
         
         % Load the EEG files of the two conditions "high focus" and "low focus"
         epo_all=[];
-        conditions={'hf' 'lf'};
+        conditions={'hf' 'lf'};        
         
         for c=1:2
-            
+                       
             % Get tags of the current condition
             idx=strfind(tags,conditions{c});
             idx= find(not(cellfun('isempty', idx)));
-            
-            % Check classification and if block effect exist
-            if(PermuteBlocks), idx=idx_permuted(c,:); end
             
             tags_condition= tags(idx);
             
@@ -65,7 +44,7 @@ for i_band=1:numel(bands_all)
                 
                 % Determine periods of stimulus presentation
                 blk=blk_segmentsFromMarkers(mrk, 'StartMarker','Start','EndMarker','Stop');
-                blk.className={conditions{c}};
+                blk.className={[conditions{c} num2str(t)]};
                 
                 blk.y= ones(1, size(blk.ival,2));                
                                 
@@ -81,10 +60,28 @@ for i_band=1:numel(bands_all)
                 else
                     epo_all = proc_appendEpochs(epo_all, epo);
                 end
-            end            
-        end                
+            end  
+            
+        end
+                
+        %% Classification - predict to which block single epoch belongs:
+         for c=1:2
+%             % Get tags of the current condition
+%             idx=strfind(epo_all.className,conditions{c});
+%             idx= find(not(cellfun('isempty', idx)));                                     
+%             fv=proc_selectClasses(epo_all,idx);   
+            epo_all.event.blkno=epo_all.event.blkno';
+            fv=proc_selectClasses(epo_all,[conditions{c} '*']);
+  
+            fv = proc_combineClasses(fv,'left',{'right','foot'});
+         end
         
-        %% Classification
+        
+        
+        % ...
+        
+        
+        %{
         fv= epo_all;
         
         proc.train= {{'CSPW', @proc_cspAuto, 3}
@@ -114,6 +111,9 @@ for i_band=1:numel(bands_all)
         
         AUC_all(tp, i_band)=1-loss; % AOC --> AUC
         fprintf('%s %f [AUC]\n', tpcode, AUC_all(tp, i_band) );
+        %}
+        
+                
     end
     
     fprintf('*** Mean *** %f [AUC]\n\n',nanmean(AUC_all(:,i_band)) );
@@ -138,6 +138,6 @@ end
 
 opt_fig= struct('folder', fullfile(BTB.FigDir,'2015-MindSee-Collaborative'));
 fname='EEG-classification-CSP';
-if(PermuteBlocks), fname=[fname '-PermutedLabels' num2str(PermuteStyle)]; end
+if(PermuteBlocks), fname=[fname '-PermutedLabels']; end
 if(BlockWiseValidation), fname=[fname '-BlockWiseValidation']; end
 util_printFigure(fname, [1.3 1]*10, opt_fig);
