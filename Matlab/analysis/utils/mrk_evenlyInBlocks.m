@@ -44,14 +44,14 @@ end
 
 nBlocks= size(blk.ival,2);
 for bb= 1:nBlocks,
-  new_time= blk.ival(1,bb)+opt.OffsetStart:msec:blk.ival(2,bb)-opt.OffsetEnd;
-  nMrk= length(new_time);
-  mrk.time= cat(2, mrk.time, new_time);
-  mrk.event.blkno= cat(2, mrk.event.blkno, bb*ones(1,length(new_time)));
-  if isfield(blk, 'y'),
-    new_y= zeros(nClasses, nMrk);
-    iClass= find(blk.y(:,bb));
-    new_y(iClass,:)= 1;
-    mrk.y= cat(2, mrk.y, new_y);
-  end
+    new_time= blk.ival(1,bb)+opt.OffsetStart:msec:blk.ival(2,bb)-opt.OffsetEnd;
+    nMrk= length(new_time);
+    mrk.time= cat(2, mrk.time, new_time);
+    mrk.event.blkno= cat(1, mrk.event.blkno, bb*ones(1,length(new_time))'); % blkno has to be column vector for later functions
+    if isfield(blk, 'y'),
+        new_y= zeros(nClasses, nMrk);
+        iClass= find(blk.y(:,bb));
+        new_y(iClass,:)= 1;
+        mrk.y= cat(2, mrk.y, new_y);
+    end
 end
