@@ -46,7 +46,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             [cnt, mrk, mnt] = file_loadMatlab(file);
             
             % Determine periods of stimulus presentation
-            blk=blk_segmentsFromMarkersNew(mrk, 'start_marker','Start','end_marker','Stop');
+            blk=blk_segmentsFromMarkers(mrk, 'StartMarker','Start','EndMarker','Stop');
 %            blk.className={conditions{c}};
             blk.className={tags_condition{t}};
             blk.y= ones(1, size(blk.ival,2));
@@ -56,7 +56,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             %[cnt_new, blk_new, mrk_new]= proc_concatBlocks(cnt, blk, mrk);
             
             % Add markers every 2000 ms only during stimulus presentation
-            mkk= mrk_evenlyInBlocksNew(blk, 2000);
+            mkk= mrk_evenlyInBlocks(blk, 2000);
             epo=proc_segmentation(cnt, mkk, [0  2000]);            
             if (t==1 && c==1)
                 epo_all=epo;
