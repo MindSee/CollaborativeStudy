@@ -6,6 +6,50 @@ stopifnot(require("R.matlab"))
 stopifnot(require("ggplot2"))
 stopifnot(require("reshape"))
 
+readPeripherals <- function(pathHome) {
+  # Update the .mat file of the peripheral.
+  # 
+  # Syntax:
+  #   peripheral <- csPeripheral(filePeripheral)
+  # 
+  # Parameters:
+  #   --
+  #   
+  #   Return values:
+  #   --
+  #   
+  #   Author: Filippo M.  11/06/2015
+
+  pathParticipants <- list.files(pathHome, full = TRUE)
+  nParticipants <- length(pathParticipants)
+  
+  pathBlocks <- list.files(pathParticipants, pattern = "Peripheral_*", full = TRUE)
+  nBlocks <- length(pathBlocks)
+  
+  boolIsFirst = TRUE
+  for (iBlocks in 1:nBlocks) {
+    file <- pathBlocks[iBlocks]
+    if (grepl("old", file)) {
+      print(cat("Non Elaboro: ", file))
+    } 
+    else{
+      if (boolIsFirst){
+        mat <- readPeripheral(file)
+        boolIsFirst = FALSE
+      }
+      else{
+        mat <- rbind(mat, readPeripheral(file))
+      }       
+    }
+  }
+  
+  clearConsole()
+  print("Processo terminato.")
+  
+  mat
+  
+}
+
 readPeripheral <- function(file) {
   # Update the .mat file of the peripheral.
   # 
@@ -67,4 +111,21 @@ readPeripheral <- function(file) {
   #   peripheral$TimeNorm <- do.call(c, lapply(split(peripheral$time, peripheral$trial), function(x) (x - min(x))))
   
   peripheral
+}
+
+anovaEMG <- function(databasePeripherals, EMG) {
+  # Linear Mixed Models
+  fit0 <- lmer(EMG ~ 1 + (1|Id), data = databasePeripherals)
+  coef(fit0)
+  fit1 <- lmer(EMG ~ Condition + (1 + Condition |Id), data = databasePeripherals)
+  coef(fit1)
+  
+  # Anova
+  anova(fit0, fit1)
+  
+  # Summary Linear Mixed Model
+  summary(lmer(EMG ~ Condition + (1 + Condition |Id), data = databasePeripherals))
+  
+  # Boxplot
+  Boxplot(databasePeripherals$EMG ~ databasePeripherals$Condition)
 }
