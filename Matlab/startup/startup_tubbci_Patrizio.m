@@ -6,11 +6,9 @@ close all
 clc
 
 % Cambio Path
-pathPatrizio = which('startup_tubbci_Patrizio.m');
-[pathPatrizio,NAME,EXT] = fileparts(pathPatrizio);
-pathPatrizio = [pathPatrizio, filesep];
-index = strfind(pathPatrizio, filesep);
-pathMindSee = pathPatrizio(1 : index(end-3));
+pathBBCI = [fileparts(which('startup_tubbci_Patrizio.m')), filesep];
+index = strfind(pathBBCI, filesep);
+pathMindSee = pathBBCI(1 : index(end-3));
 addpath(genpath(pathMindSee));
 
 cd([pathMindSee]);
@@ -19,6 +17,9 @@ global BTB
 
 % Path of the data directory for EEG and log files
 DATA_DIR = fullfile(pathMindSee, 'data')
+mkdir(DATA_DIR, 'bbciMat');
+mkdir(DATA_DIR, 'bbciRaw');
+mkdir(DATA_DIR, 'tmp');
 
 % Path of the BBCI public toolbox
 BBCI_DIR = fullfile(pathMindSee, 'bbci_public')

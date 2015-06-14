@@ -42,7 +42,7 @@ try
     axis([0 w 0 h])
     
     % Plot Stimulus
-    imageFileName = which([simbol, '_', focus, '_', target, '.tif']);
+    imageFileName = which([simbol, '_', focus, '_', target, '.jpg']);
     imageFilePath = fileparts(imageFileName);
     imageStimulus = imread(imageFileName);
     

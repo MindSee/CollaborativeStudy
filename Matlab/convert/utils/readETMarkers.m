@@ -3,7 +3,7 @@ function [ET_mrk] = readETMarkers(file)
 % the BTB.RawDir. Use function like "file_readBV".
 % To make sense of the meaning of the EEG markers we need to match the
 % marker number with the description present in the corresponding eye
-% tracker event file. This file contains infromation about the markers in
+% tracker event file. This file contains information about the markers in
 % the lines starting with "UserEvent", e.g.:
 % UserEvent	1	2	12649562197	# Message: mkr028_Start_tr_lf_07
 % The structure "ET_mrk" contains information about the marker number and

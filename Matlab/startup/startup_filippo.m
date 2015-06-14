@@ -1,9 +1,8 @@
-% % % % function [] = startup_filippo()
-% % % % startup_filippo
+function [] = startup_filippo()
 
-% % % % WorkSpace
-% % % clear all
-% % % close all
+% WorkSpace
+clear all
+close all
 clc
 
 % Paths
@@ -18,6 +17,9 @@ global BTB
 
 % Path of the data directory for EEG and log files
 DATA_DIR = fullfile(pathMindSee, 'data');
+mkdir(DATA_DIR, 'bbciMat');
+mkdir(DATA_DIR, 'bbciRaw');
+mkdir(DATA_DIR, 'tmp');
 
 % Path of the BBCI public toolbox
 BBCI_DIR = pathBBCI;
@@ -33,11 +35,23 @@ addpath(genpath(fullfile(BTB.PrivateDir)));
 format compact
 format longg
 
-% Fixations Parameters
-diameterTarget = 60;
-threesholdFixations = 150000;
-checkPlot = false;
+cd(pathMindSee)
 
-tic
-convertEYES(diameterTarget, threesholdFixations, checkPlot);
-toc
+% WorkSpace
+clear all
+close all
+clc
+
+% convertPeripheralEMG('/Users/filippominelle/Documents/MindSee/data/DataPeripheral');
+convertPeripheralBehaviour('/Users/filippominelle/Documents/MindSee/data/Behavioural_data_Collaborative_Study');
+
+disp('fatto')
+
+% % Fixations Parameters
+% diameterTarget = 60;
+% threesholdFixations = 150000;
+% checkPlot = false;
+%
+% tic
+% convertEYES_mpippo87(diameterTarget, threesholdFixations, checkPlot);
+% toc

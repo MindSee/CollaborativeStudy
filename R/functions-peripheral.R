@@ -20,20 +20,20 @@ readPeripheral <- function(file, matlab_path = "/Applications/MATLAB_R2012b.app/
   
   evaluate(matlab, sprintf("mrktime = per.mrk.time;"))
   mrktime <- getVariable(matlab, "mrktime")$mrktime
-    
+  
   evaluate(matlab, sprintf("mrky = per.mrk.y;"))
   mrky <- getVariable(matlab, "mrky")$mrky
   
   evaluate(matlab, sprintf("mrkclass = per.mrk.className;"))
   mrkclass <- getVariable(matlab, "mrkclass")$mrkclass
   mrkclass <- unlist(mrkclass)
-
+  
   mrkclass <- mrkclass[apply(mrky, 2, function(x) which(x == 1))]
-    
+  
   dat <- list()
   evaluate(matlab, sprintf("ch3 = per.ch3;"))
   dat$EDA <- getVariable(matlab, "ch3")$ch3
-
+  
   evaluate(matlab, sprintf("ch2 = per.ch2;"))
   dat$EMGb <- getVariable(matlab, "ch2")$ch2
   
@@ -53,7 +53,7 @@ readPeripheral <- function(file, matlab_path = "/Applications/MATLAB_R2012b.app/
   dat <- as.data.frame(dat)
   dat <- lapply(seq(trials), function(i) { dat[trials[[i]], ] })
   dat <- lapply(seq(dat), function(i) {cbind(trial = i, dat[[i]])})
-
+  
   dat <- lapply(seq(dat), 
                 function(i) {
                   dat[[i]]$time <- seq(trial_start_time[i],
@@ -71,7 +71,7 @@ readPeripheral <- function(file, matlab_path = "/Applications/MATLAB_R2012b.app/
   
   dat$TimeNorm <- do.call(c, lapply(split(dat$time, dat$trial), function(x) (x - min(x))))
   
- dat
+  dat
 }
 
 
