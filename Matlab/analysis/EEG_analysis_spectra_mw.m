@@ -10,8 +10,8 @@ spec_r={};
 spec_avg={};
 
 % Check classification and if block effect exist
-PermuteBlocks=1;
-switch 4
+PermuteBlocks=0;
+switch 0
     case 1% Unbalanced permutation
         idx_permuted=reshape(randperm(12),[2,6]);
     case 2 % Balanced permutation
@@ -46,8 +46,9 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             [cnt, mrk, mnt] = file_loadMatlab(file);
             
             % Determine periods of stimulus presentation
-            blk=blk_segmentsFromMarkersNew(mrk, 'start_marker','Start','end_marker','Stop');
-            blk.className={conditions{c}};
+            blk=blk_segmentsFromMarkers(mrk, 'StartMarker','Start','EndMarker','Stop');
+%            blk.className={conditions{c}};
+            blk.className={tags_condition{t}};
             blk.y= ones(1, size(blk.ival,2));
             blk.fs=cnt.fs;
             
@@ -55,7 +56,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             %[cnt_new, blk_new, mrk_new]= proc_concatBlocks(cnt, blk, mrk);
             
             % Add markers every 2000 ms only during stimulus presentation
-            mkk= mrk_evenlyInBlocksNew(blk, 2000);
+            mkk= mrk_evenlyInBlocks(blk, 2000);
             epo=proc_segmentation(cnt, mkk, [0  2000]);            
             if (t==1 && c==1)
                 epo_all=epo;
@@ -69,6 +70,16 @@ for tp=1:numel(subdir_list) % Select one of the test persons
     epo_all=rmfield(epo_all,'event');
     
     spec{tp}= proc_spectrum(epo_all, [1 80]);
+    
+    hf_opt_grid_spec= defopt_spec('xTickAxes','CPz', 'colorOrder',cmap_hsvFade(6,[0 2/6],1,1));
+    lf_opt_grid_spec= defopt_spec('xTickAxes','CPz', 'colorOrder',cmap_hsvFade(6,[3/6 5/6],1,1));
+    hf= proc_selectClasses(spec{tp}, 1:6);
+    lf= proc_selectClasses(spec{tp}, 7:12);
+    fig_set(1, 'gridSize',[1 2])
+    grid_plot(lf, mnt, lf_opt_grid_spec)
+    fig_set(2, 'gridSize',[1 2])
+    grid_plot(hf, mnt, hf_opt_grid_spec)
+
     spec_r{tp}= proc_rSquareSigned(spec{tp},'Stats',1);
     spec_avg{tp}= proc_average(spec{tp},'Stats',1);
 end
@@ -84,7 +95,7 @@ spec_r_ga= proc_grandAverage(spec_r{1:end},'Stats',1);
 % Plot
 colOrder= [245 159 0; 0 150 200]/255;
 opt_grid_spec= defopt_spec('xTickAxes','CPz', 'colorOrder',colOrder);
-opt_fig= struct('folder', fullfile(BTB.FigDir));
+opt_fig= struct('folder', fullfile(BTB.FigDir,'2015-MindSee-Collaborative'));
 
 %{
 for tp=1:numel(subdir_list)

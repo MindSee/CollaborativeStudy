@@ -42,7 +42,8 @@ clear all
 close all
 clc
 
-convertPeripheralEMG('/Users/filippominelle/Documents/MindSee/data/DataPeripheral');
+% convertPeripheralEMG('/Users/filippominelle/Documents/MindSee/data/DataPeripheral');
+convertPeripheralBehaviour('/Users/filippominelle/Documents/MindSee/data/Behavioural_data_Collaborative_Study');
 
 disp('fatto')
 

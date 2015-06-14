@@ -24,7 +24,7 @@ try
             nTempPath = length(tempPath);
             for iTempPath = 1 : nTempPath
                 if ~(isempty(strfind(tempPath(iTempPath).name, 'Peripheral_')))
-                    file = [pathPeripheral, filesep, path(iPath).name, filesep, tempPath(iTempPath).name];
+                    file = [pathPeripheral, filesep, path(iPath).name, filesep, tempPath(iTempPath).name]
                     csPeripheral(file)
                 end
             end

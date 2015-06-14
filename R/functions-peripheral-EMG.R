@@ -44,7 +44,7 @@ readPeripherals <- function(pathHome) {
   }
   
   clearConsole()
-  print("Processo terminato.")
+  print("Process terminated.")
   
   mat
   
@@ -102,7 +102,7 @@ readPeripheral <- function(file) {
   #                        })
   #   
   #   peripheral <- do.call(rbind, peripheral)
-  #   
+    
   peripheral <- data.frame(Id = sub(".+Peripheral_(.+)_(.+)_(.+).mat", "\\3", file),
                            Condition = sub(".+Peripheral_(.+)_(.+)_(.+).mat", "\\1", file),
                            Symbol = sub(".+Peripheral_(.+)_(.+)_(.+).mat", "\\2", file),
@@ -111,6 +111,51 @@ readPeripheral <- function(file) {
   #   peripheral$TimeNorm <- do.call(c, lapply(split(peripheral$time, peripheral$trial), function(x) (x - min(x))))
   
   peripheral
+}
+
+readBehaviourals <- function(pathDataBehavioural) {
+  # Update the .mat file of the peripheral.
+  # 
+  # Syntax:
+  #   peripheral <- csPeripheral(filePeripheral)
+  # 
+  # Parameters:
+  #   --
+  #   
+  #   Return values:
+  #   --
+  #   
+  #   Author: Filippo M.  11/06/2015
+  
+  pathParticipants <- list.files(pathHome, full = TRUE)
+  nParticipants <- length(pathParticipants)
+  
+  pathBlocks <- list.files(pathParticipants, pattern = "Peripheral_*", full = TRUE)
+  nBlocks <- length(pathBlocks)
+  
+  excel <- read.csv()
+  
+  boolIsFirst = TRUE
+  for (iBlocks in 1:nBlocks) {
+    file <- pathBlocks[iBlocks]
+    if (grepl("old", file)) {
+      print(cat("Non Elaboro: ", file))
+    } 
+    else{
+      if (boolIsFirst){
+        mat <- readPeripheral(file)
+        boolIsFirst = FALSE
+      }
+      else{
+        mat <- rbind(mat, readPeripheral(file))
+      }       
+    }
+  }
+  
+  clearConsole()
+  print("Processo terminato.")
+  
+  mat
 }
 
 anovaEMG <- function(databasePeripherals, EMG) {
@@ -129,3 +174,4 @@ anovaEMG <- function(databasePeripherals, EMG) {
   # Boxplot
   Boxplot(databasePeripherals$EMG ~ databasePeripherals$Condition)
 }
+

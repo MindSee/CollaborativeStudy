@@ -31,15 +31,25 @@ source("~/Documents/MindSee/CollaborativeStudy/R/functions-peripheral-EMG.R")
 # source("~/Documents/MindSee/CollaborativeStudy/R/timeTot.R")
 
 # Path
-pathHome <- "~/Documents/MindSee/data/DataPeripheral"
+pathDataPeripherals <- "~/Documents/MindSee/data/DataPeripheral"
+pathDataBehavioural  <- "~/Documents/MindSee/data/Behavioural_data_Collaborative_Study"
 
-# Get Raw Data
-boolReadFileTxt = TRUE
-if (boolReadFileTxt){
+# Get Peripherals Data
+boolReadPeripheralsTxt = TRUE
+if (boolReadPeripheralsTxt){
   Peripheral_d <- read.table("~/Documents/MindSee/data/bbciRaw/Peripheral_d.txt", header = T)
 } else {
-  Peripheral_d <- readPeripherals(pathHome)
+  Peripheral_d <- readPeripherals(pathDataPeripherals)
   str(Peripheral_d)  
+}
+
+# Get Behavioural Data
+boolReadBehaviouralTxt = FALSE
+if (boolReadBehaviouralTxt){
+  Peripheral_d <- read.table("~/Documents/MindSee/data/bbciRaw/Peripheral_d.txt", header = T)
+} else {
+  Behavioural_d <- readPeripherals(pathDataBehavioural)
+  str(Behavioural_d)  
 }
 
 # Mean
