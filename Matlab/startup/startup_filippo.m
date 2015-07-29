@@ -1,4 +1,4 @@
-% % function [] = startup_filippo()
+function [] = startup_filippo()
 
 % WorkSpace
 clear all
@@ -35,11 +35,23 @@ addpath(genpath(fullfile(BTB.PrivateDir)));
 format compact
 format longg
 
-% Fixations Parameters
-diameterTarget = 60;
-threesholdFixations = 150000;
-checkPlot = false;
+cd(pathMindSee)
 
-tic
-convertEYES(diameterTarget, threesholdFixations, checkPlot);
-toc
+% WorkSpace
+clear all
+close all
+clc
+
+% convertPeripheralEMG('/Users/filippominelle/Documents/MindSee/data/DataPeripheral');
+convertPeripheralBehaviour('/Users/filippominelle/Documents/MindSee/data/Behavioural_data_Collaborative_Study');
+
+disp('fatto')
+
+% % Fixations Parameters
+% diameterTarget = 60;
+% threesholdFixations = 150000;
+% checkPlot = false;
+%
+% tic
+% convertEYES_mpippo87(diameterTarget, threesholdFixations, checkPlot);
+% toc

@@ -14,7 +14,8 @@ readLedalab <- function(f, ORIGDIR, LEDADIR) {
       Time = leda_obj$data["time", , ]$time[1, ],
       Conductance = leda_obj$data["conductance", , ]$conductance[1, ],
       PhasicData = leda_obj$analysis["phasicData", , ]$phasicData[1, ],
-      TonicData = leda_obj$analysis["tonicData", , ]$tonicData[1, ])
+      TonicData = leda_obj$analysis["tonicData", , ]$tonicData[1, ],
+      stringsAsFactors = FALSE)
   
   fs <- orig_obj$data["fs", , ]$fs[1, 1]
   trials <- orig_obj$data["trials", , ]$trials

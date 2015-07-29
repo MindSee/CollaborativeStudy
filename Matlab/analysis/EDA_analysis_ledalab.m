@@ -25,7 +25,7 @@ for tp=1:numel(subdir_list) % Select one of the test persons
         % Load files of the current condition
         for t=1:numel(tags_condition)
             file= fullfile(BTB.MatDir, subdir_list{tp},['Peripheral_' tags_condition{t} '_' tpcode '.mat']);
-            
+           
             disp(file);
             
             [cnt, mrk, mnt] = file_loadMatlab(file);
@@ -40,14 +40,16 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             stop_ms = max(blk.ival(:));
             
             start_ms = start_ms - (1 * 1000);  % add one second at the beginning
-            stop_ms = stop_ms + (1 * 1000);    % ... and end
+            %stop_ms = stop_ms + (1 * 1000);    % ... and end
 
             start_idx = round(start_ms / (1000 / blk.fs));
             stop_idx = round(stop_ms / (1000 / blk.fs));
             
             % Ledalab structure:
             data = struct();
-            data.conductance = cnt.x(start_idx:stop_idx);
+            data.conductance = cnt.x(start_idx:stop_idx, find(ismember(cnt.clab, 'EDA')));
+            data.conductance = abs(data.conductance);
+            data.conductance = data.conductance - min(data.conductance);
             data.time = linspace(0, length(data.conductance)/blk.fs, length(data.conductance)); % seconds
             data.timeoff = 0;
             data.event = [];
