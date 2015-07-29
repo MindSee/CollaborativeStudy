@@ -5,8 +5,31 @@ global BTB
 
 convertBaseEEG;
 
+% Select only good channels for each subjects, which are not that informative
+% about the single blocks (determined in EEG_classification_ChannelSelection)
+GoodChannelsOnly=1;
+if(GoodChannelsOnly)
+    results_dir=fullfile(BTB.DataDir,'results','2015-MindSee-Collaborative');
+    results_file=fullfile(results_dir,'EEG-classification-channel-selection');
+    load(results_file);
+    
+    % Determine good channels of each subject
+    good_channels=AUC_channels_mat < 0.6;  
+    
+    fig_set(1)
+    bar(sum(good_channels,1));    
+    clabs={'Fpz' 'F7' 'Fz' 'F8' 'FC5' 'FC1' 'FC2' 'FC6' 'T7' 'C3' 'Cz' 'C4' 'T8' ...
+        'CP5' 'CP1' 'CP2' 'CP6' 'P7' 'P3' 'Pz' 'P4' 'P8' 'PO1' 'PO2' 'O1' 'O2'};
+    set(gca,'XTick', 1:numel(clabs),'XTickLabel',clabs);	 
+    ylabel('Number of participants')
+    
+    good_subjects=find(sum(good_channels,2) > 3);    
+    good_channels=good_channels(good_subjects,:); % update it!
+    subdir_list=subdir_list(good_subjects);
+end
+
 % crossvalidation leaving blocks out (1) or sample_KFold (0)
-BlockWiseValidation=0;
+BlockWiseValidation=1;
 
 % Permute blocks/trials to check classification and if block effect exist
 PermuteBlocks=false;
@@ -35,7 +58,7 @@ for i_band=1:numel(bands_all)
     fprintf('Frequency band "%s": %i Hz - %i Hz\n', bands_names{i_band}, band);
     
     for tp=1:numel(subdir_list) % Select one of the test persons
-                  
+        
         tpcode=regexp(subdir_list{tp},'_','split'); tpcode=tpcode{1};
         BTB.Tp.Dir=fullfile(BTB.MatDir,subdir_list{tp});
         
@@ -59,6 +82,13 @@ for i_band=1:numel(bands_all)
                 file= fullfile(BTB.MatDir, subdir_list{tp},['EEG_' tags_condition{t} '_' tpcode '.mat']);
                 [cnt, mrk, mnt] = file_loadMatlab(file);
                 
+                % Select only good channels for each subjects, which are not that informative
+                % about the single blocks (determined in EEG_classification_ChannelSelection)
+                if(GoodChannelsOnly)                           
+                    cnt=proc_selectChannels(cnt,find(good_channels(tp,:)));
+                end
+                
+                
                 % Bandpass filter for CSP
                 [filt_b,filt_a]= butter(5, band/cnt.fs*2);
                 cnt= proc_filt(cnt, filt_b, filt_a);
@@ -67,23 +97,23 @@ for i_band=1:numel(bands_all)
                 blk=blk_segmentsFromMarkers(mrk, 'StartMarker','Start','EndMarker','Stop');
                 blk.className={conditions{c}};
                 
-                blk.y= ones(1, size(blk.ival,2));                
-                                
+                blk.y= ones(1, size(blk.ival,2));
+                
                 % Add markers every 2000 ms only during stimulus presentation
                 mkk= mrk_evenlyInBlocks(blk, 2000);
                 mkk.event.blkno = repmat(t, size(mkk.event.blkno));
                 
                 % Segmentation into epochs
                 epo=proc_segmentation(cnt, mkk, [0  2000]);
-                            
+                
                 if (t==1 && c==1)
                     epo_all=epo;
                 else
                     epo_all = proc_appendEpochs(epo_all, epo);
                 end
-            end            
-        end                
-        
+            end
+        end
+
         %% Classification
         fv= epo_all;
         
@@ -96,9 +126,9 @@ for i_band=1:numel(bands_all)
             @proc_logarithm
             };
         
-        if tpcode=='VPpal', continue, end       
+        if tpcode=='VPpal', continue, end
         % (Error using eig, Input to EIG must not contain NaN or Inf)
-
+        
         % Check whether xval works
         %fv.y=fv.y(:,randperm(size(fv.y,2)) );
         
@@ -140,4 +170,5 @@ opt_fig= struct('folder', fullfile(BTB.FigDir,'2015-MindSee-Collaborative'));
 fname='EEG-classification-CSP';
 if(PermuteBlocks), fname=[fname '-PermutedLabels' num2str(PermuteStyle)]; end
 if(BlockWiseValidation), fname=[fname '-BlockWiseValidation']; end
+if(GoodChannelsOnly), fname=[fname '-GoodChannelsOnly']; end
 util_printFigure(fname, [1.3 1]*10, opt_fig);
