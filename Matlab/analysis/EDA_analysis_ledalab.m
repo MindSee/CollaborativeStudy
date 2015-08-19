@@ -48,8 +48,12 @@ for tp=1:numel(subdir_list) % Select one of the test persons
             % Ledalab structure:
             data = struct();
             data.conductance = cnt.x(start_idx:stop_idx, find(ismember(cnt.clab, 'EDA')));
-            data.conductance = abs(data.conductance);
-            data.conductance = data.conductance - min(data.conductance);
+            
+            if min(data.conductance) < 0
+                data.conductance = data.conductance + min(data.conductance);
+            else
+                data.conductance = data.conductance - min(data.conductance);
+                
             data.time = linspace(0, length(data.conductance)/blk.fs, length(data.conductance)); % seconds
             data.timeoff = 0;
             data.event = [];
